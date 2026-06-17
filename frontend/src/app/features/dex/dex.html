@@ -325,6 +325,7 @@
             [class.dex-card--favorited]="isFavorite(card.id)"
             [class.dex-card--generated]="card.usesGeneratedSprite"
             [style.--primary-type-color]="typeColor(card.types[0])"
+            [routerLink]="['/details', card.isFusion ? (card.head.id + '.' + card.body!.id) : (card.head.id + '.' + card.head.id)]"
           >
 
             <!-- Sprite area -->

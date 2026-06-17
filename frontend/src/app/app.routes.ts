@@ -24,7 +24,7 @@ export const routes: Routes = [
           import('./features/dex/dex.routes').then((m) => m.DEX_ROUTES),
       },
       {
-        path: 'pokemon/:head/:body',
+        path: 'details/:id',
         loadChildren: () =>
           import('./features/pokemon/pokemon.routes').then(
             (m) => m.POKEMON_ROUTES,

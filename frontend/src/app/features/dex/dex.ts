@@ -2,6 +2,7 @@ import {
   AfterViewInit, Component, ElementRef, NgZone, OnDestroy,
   ViewChild, computed, effect, inject, signal,
 } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { Pokemon } from '../../models/pokemon.model';
 import { DisplayCard, DexFilters, FusionPosition, SortOption } from '../../models/fusion.model';
 import { PokemonService }  from '../../core/services/pokemon.service';
@@ -20,7 +21,7 @@ const TYPE_COLORS: Record<string, string> = {
 
 @Component({
   selector: 'app-dex',
-  imports: [],
+  imports: [RouterLink],
   templateUrl: './dex.html',
   styleUrl: './dex.scss',
 })

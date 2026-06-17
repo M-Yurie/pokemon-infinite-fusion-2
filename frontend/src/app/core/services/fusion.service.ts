@@ -110,6 +110,20 @@ export class FusionService {
     return pool.slice(offset, offset + limit).map(item => this.makeDisplayCard(item));
   }
 
+  getFusionTypes(h: Pokemon, b: Pokemon): string[] {
+    return this.fusionTypes(h, b);
+  }
+
+  getFusionStats(h: Pokemon, b: Pokemon): { hp: number; atk: number; def: number; spa: number; spd: number; spe: number; total: number } {
+    const hp  = Math.round((2/3)*h.stats.hp  + (1/3)*b.stats.hp);
+    const atk = Math.round((1/3)*h.stats.atk + (2/3)*b.stats.atk);
+    const def = Math.round((1/3)*h.stats.def + (2/3)*b.stats.def);
+    const spa = Math.round((2/3)*h.stats.spa + (1/3)*b.stats.spa);
+    const spd = Math.round((2/3)*h.stats.spd + (1/3)*b.stats.spd);
+    const spe = Math.round((1/3)*h.stats.spe + (2/3)*b.stats.spe);
+    return { hp, atk, def, spa, spd, spe, total: hp + atk + def + spa + spd + spe };
+  }
+
   // ─── Private helpers ──────────────────────────────────────────────────────
   private passesFusionSelection(
     head: Pokemon,

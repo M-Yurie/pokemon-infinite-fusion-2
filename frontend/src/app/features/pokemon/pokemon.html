@@ -1,3 +1,381 @@
-<section class="page page--pokemon">
-  <h1>Pokémon Detail</h1>
-</section>
+<!-- ══════════════════════════════════════════════════ DETAILS PAGE ══ -->
+<div class="pd-page" (click)="devolveOpen.set(false); evolveOpen.set(false)">
+
+  <!-- ─── Gallery modal ─────────────────────────────────────────────────── -->
+  @if (galleryTarget()) {
+    <div class="pd-modal-backdrop" (click)="closeGallery()">
+      <div class="pd-modal" (click)="stopEvent($event)">
+        <div class="pd-modal__header">
+          <span class="pd-modal__title">Alternative Sprites</span>
+          <button class="pd-modal__close" (click)="closeGallery()" aria-label="Close">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+        <div class="pd-modal__grid">
+          @if (!galleryItems().length) {
+            <p class="pd-modal__loading">Loading sprites…</p>
+          }
+          @for (item of galleryItems(); track item.variant; let isLast = $last) {
+            <div
+              class="pd-modal__sprite-item"
+              [class.pd-modal__sprite-item--selected]="gallerySelected()?.variant === item.variant"
+              (click)="selectGalleryItem(item, $event)"
+            >
+              <div class="pd-modal__sprite-wrap">
+                <img class="pd-modal__sprite-img" [src]="item.url" [alt]="item.label" loading="lazy" />
+                @if (isLast && galleryItems().length > 1) {
+                  <span class="pd-modal__sprite-new">New</span>
+                }
+              </div>
+            </div>
+          }
+        </div>
+        <div class="pd-modal__footer">
+          <button class="pd-modal__btn-close" (click)="closeGallery()">Close</button>
+          <button
+            class="pd-modal__btn-set-default"
+            [class.pd-modal__btn-set-default--enabled]="gallerySelected() !== null"
+            (click)="setAsDefault()"
+          >Set as Default</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="pd-loading">
+      <div class="pd-dots">
+        <div class="pd-dot" style="background:#7C6CFF"></div>
+        <div class="pd-dot" style="background:#79DFFF"></div>
+        <div class="pd-dot" style="background:#FF8BCF"></div>
+      </div>
+    </div>
+  }
+
+  @if (!loading() && head()) {
+    <div class="pd-inner">
+
+      <!-- ─── Mobile evo dropdowns ───────────────────────────────────────── -->
+      <div class="pd-mobile-evo">
+        @if (devolveOptions().length > 0) {
+          <div class="pd-mobile-evo__wrap">
+            <button class="pd-mobile-evo__btn" (click)="toggleDevolve(); $event.stopPropagation()">
+              Devolve
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            @if (devolveOpen()) {
+              <div class="pd-mobile-evo__dropdown" (click)="$event.stopPropagation()">
+                @for (opt of devolveOptions(); track opt.id) {
+                  <a class="pd-mobile-evo__option" [routerLink]="['/details', opt.id]" (click)="devolveOpen.set(false)">{{ opt.label }}</a>
+                }
+              </div>
+            }
+          </div>
+        }
+        @if (evolveOptions().length > 0) {
+          <div class="pd-mobile-evo__wrap">
+            <button class="pd-mobile-evo__btn" (click)="toggleEvolve(); $event.stopPropagation()">
+              Evolve
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            @if (evolveOpen()) {
+              <div class="pd-mobile-evo__dropdown" (click)="$event.stopPropagation()">
+                @for (opt of evolveOptions(); track opt.id) {
+                  <a class="pd-mobile-evo__option" [routerLink]="['/details', opt.id]" (click)="evolveOpen.set(false)">{{ opt.label }}</a>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- ─── Sprite area ──────────────────────────────────────────────────── -->
+      <div class="pd-sprite-layout">
+
+        <!-- Left: Devolve buttons (desktop) -->
+        <div class="pd-evo-col pd-evo-col--left">
+          @if (headEvoInfo().prev) {
+            <a class="pd-evo-btn pd-evo-btn--left" [routerLink]="['/details', headEvoInfo().prev!.dexNumber + '.' + bodyId()]">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+              Head → {{ headEvoInfo().prev!.name }}
+            </a>
+          }
+          @if (!isSelfFusion() && bodyEvoInfo().prev) {
+            <a class="pd-evo-btn pd-evo-btn--left" [routerLink]="['/details', headId() + '.' + bodyEvoInfo().prev!.dexNumber]">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+              Body → {{ bodyEvoInfo().prev!.name }}
+            </a>
+          }
+        </div>
+
+        <!-- Sprites -->
+        <div class="pd-sprites">
+
+          <!-- Left sprite -->
+          <div class="pd-sprite-col">
+            <div class="pd-sprite-meta">
+              <span class="pd-sprite-num">{{ leftLabel().id }}</span>
+              <span class="pd-sprite-name">{{ leftLabel().name }}</span>
+            </div>
+            <div class="pd-sprite-wrap">
+              <img
+                class="pd-sprite-img"
+                [src]="leftSpriteUrl()"
+                [alt]="leftLabel().name"
+                (error)="onSpriteError('left', $any($event.target))"
+              />
+              <div class="pd-sprite-fallback"></div>
+              <div class="pd-sprite-placeholder" style="display:none"><span>?</span></div>
+              @if (leftBadge() > 1) {
+                <div class="pd-badge" (click)="openGallery('left', $event)" [title]="leftBadge() + ' sprites'">
+                  {{ leftBadge() >= 10 ? '+' : leftBadge() }}
+                </div>
+              }
+            </div>
+            <div class="pd-sprite-types">
+              @for (t of leftTypes(); track t) {
+                <span class="pd-type-badge" [style.--tc]="typeColor(t)">{{ t }}</span>
+              }
+            </div>
+          </div>
+
+          <div class="pd-sprites-vs">vs</div>
+
+          <!-- Right sprite -->
+          <div class="pd-sprite-col">
+            <div class="pd-sprite-meta">
+              <span class="pd-sprite-num">{{ rightLabel().id }}</span>
+              <span class="pd-sprite-name">{{ rightLabel().name }}</span>
+            </div>
+            <div class="pd-sprite-wrap">
+              <img
+                class="pd-sprite-img"
+                [src]="rightSpriteUrl()"
+                [alt]="rightLabel().name"
+                (error)="onSpriteError('right', $any($event.target))"
+              />
+              <div class="pd-sprite-fallback"></div>
+              <div class="pd-sprite-placeholder" style="display:none"><span>?</span></div>
+              @if (rightBadge() > 1) {
+                <div class="pd-badge" (click)="openGallery('right', $event)" [title]="rightBadge() + ' sprites'">
+                  {{ rightBadge() >= 10 ? '+' : rightBadge() }}
+                </div>
+              }
+            </div>
+            <div class="pd-sprite-types">
+              @for (t of rightTypes(); track t) {
+                <span class="pd-type-badge" [style.--tc]="typeColor(t)">{{ t }}</span>
+              }
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right: Evolve buttons (desktop) -->
+        <div class="pd-evo-col pd-evo-col--right">
+          @for (e of headEvoInfo().next; track e.dexNumber) {
+            <a class="pd-evo-btn pd-evo-btn--right" [routerLink]="['/details', e.dexNumber + '.' + bodyId()]">
+              Head → {{ e.name }}
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+            </a>
+          }
+          @for (e of bodyEvoInfo().next; track e.dexNumber) {
+            @if (!isSelfFusion()) {
+              <a class="pd-evo-btn pd-evo-btn--right" [routerLink]="['/details', headId() + '.' + e.dexNumber]">
+                Body → {{ e.name }}
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+              </a>
+            }
+          }
+        </div>
+
+      </div>
+
+      <!-- ════════════════════════════════════════════════════ STATS ══ -->
+      <div class="pd-section">
+        <div class="pd-section-bar">Stats</div>
+        <div class="pd-section-body">
+          @if (isSelfFusion()) {
+            <!-- Single row: base stats -->
+            <div class="pd-stats-single">
+              @for (s of statRows(); track s.key) {
+                <div class="pd-stat-col">
+                  <span class="pd-stat-label">{{ s.label }}</span>
+                  <span class="pd-stat-value" [style.color]="getStatColor(s.leftVal, s.isTotal)">{{ s.leftVal }}</span>
+                  <div class="pd-stat-bar-wrap">
+                    <div class="pd-stat-bar" [style.width.%]="getStatPercent(s.leftVal, s.isTotal)" [style.background]="getStatColor(s.leftVal, s.isTotal)"></div>
+                  </div>
+                </div>
+              }
+            </div>
+          } @else {
+            <!-- Comparison table -->
+            <div class="pd-stats-compare">
+              @for (s of statRows(); track s.key) {
+                <div class="pd-stat-left">
+                  <div class="pd-stat-bar-wrap pd-stat-bar-wrap--left">
+                    <div class="pd-stat-bar pd-stat-bar--left" [style.width.%]="getStatPercent(s.leftVal, s.isTotal)" [style.background]="getStatColor(s.leftVal, s.isTotal)"></div>
+                  </div>
+                  <span class="pd-stat-value" [style.color]="getStatColor(s.leftVal, s.isTotal)">{{ s.leftVal }}</span>
+                  @if (s.diff !== 0) {
+                    <span class="pd-stat-diff" [class.pd-stat-diff--pos]="s.diff > 0" [class.pd-stat-diff--neg]="s.diff < 0">
+                      {{ s.diff > 0 ? '+' : '' }}{{ s.diff }}
+                    </span>
+                  }
+                </div>
+                <div class="pd-stat-name">{{ s.label }}</div>
+                <div class="pd-stat-right">
+                  @if (s.diff !== 0) {
+                    <span class="pd-stat-diff" [class.pd-stat-diff--pos]="s.diff < 0" [class.pd-stat-diff--neg]="s.diff > 0">
+                      {{ s.diff < 0 ? '+' : '' }}{{ s.diff !== 0 ? (-s.diff) : '' }}
+                    </span>
+                  }
+                  <span class="pd-stat-value" [style.color]="getStatColor(s.rightVal, s.isTotal)">{{ s.rightVal }}</span>
+                  <div class="pd-stat-bar-wrap">
+                    <div class="pd-stat-bar" [style.width.%]="getStatPercent(s.rightVal, s.isTotal)" [style.background]="getStatColor(s.rightVal, s.isTotal)"></div>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════ ABILITIES ══ -->
+      <div class="pd-section">
+        <div class="pd-section-bar">Abilities</div>
+        <div class="pd-section-body pd-abilities">
+          <div class="pd-abilities__col">
+            <div class="pd-abilities__header">Regular</div>
+            @for (a of abilities().regular; track a.name) {
+              <div class="pd-ability">
+                <span class="pd-ability__name">{{ a.name }}</span>
+                <span class="pd-ability__desc">{{ a.description }}</span>
+              </div>
+            }
+          </div>
+          <div class="pd-abilities__col">
+            <div class="pd-abilities__header">Hidden</div>
+            @if (abilities().hidden.length === 0) {
+              <span class="pd-abilities__empty">—</span>
+            }
+            @for (a of abilities().hidden; track a.name) {
+              <div class="pd-ability">
+                <span class="pd-ability__name">{{ a.name }}</span>
+                <span class="pd-ability__desc">{{ a.description }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════════════════════ WEAKNESSES ══ -->
+      <div class="pd-section">
+        <div class="pd-section-bar">Weaknesses</div>
+        <div class="pd-section-body">
+          @if (sameWeaknesses()) {
+            <!-- One centered table -->
+            <div class="pd-weak-table">
+              @for (group of leftWeaknesses(); track group.multiplier) {
+                <div class="pd-weak-row">
+                  <span class="pd-weak-mult">{{ group.label }}</span>
+                  <div class="pd-weak-types">
+                    @for (t of group.types; track t) {
+                      <span class="pd-type-badge" [style.--tc]="typeColor(t)">{{ t }}</span>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          } @else {
+            <!-- Two tables side by side -->
+            <div class="pd-weak-split">
+              <div class="pd-weak-panel">
+                <div class="pd-weak-panel__label">{{ leftLabel().name }}</div>
+                <div class="pd-weak-table">
+                  @for (group of leftWeaknesses(); track group.multiplier) {
+                    <div class="pd-weak-row">
+                      <span class="pd-weak-mult">{{ group.label }}</span>
+                      <div class="pd-weak-types">
+                        @for (t of group.types; track t) {
+                          <span class="pd-type-badge" [style.--tc]="typeColor(t)">{{ t }}</span>
+                        }
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+              <div class="pd-weak-panel">
+                <div class="pd-weak-panel__label">{{ rightLabel().name }}</div>
+                <div class="pd-weak-table">
+                  @for (group of rightWeaknesses(); track group.multiplier) {
+                    <div class="pd-weak-row">
+                      <span class="pd-weak-mult">{{ group.label }}</span>
+                      <div class="pd-weak-types">
+                        @for (t of group.types; track t) {
+                          <span class="pd-type-badge" [style.--tc]="typeColor(t)">{{ t }}</span>
+                        }
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════ EVOLUTION LINE ══ -->
+      <div class="pd-section">
+        <div class="pd-section-bar">Evolution Line</div>
+        <div class="pd-section-body pd-evo-section">
+
+          <!-- Head chain -->
+          <div class="pd-evo-chain">
+            @for (entry of headChain(); track entry.dexNumber; let i = $index) {
+              @if (i > 0) {
+                <div class="pd-evo-arrow">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+                  @if (headChain()[i - 1].evolvesAtLevel) {
+                    <span class="pd-evo-level">Lv {{ headChain()[i - 1].evolvesAtLevel }}</span>
+                  }
+                </div>
+              }
+              <a class="pd-evo-card" [routerLink]="evoCardRoute(entry.dexNumber)" [class.pd-evo-card--current]="entry.dexNumber === headId() || entry.dexNumber === bodyId()">
+                <img class="pd-evo-card__img" [src]="imageSvc.getBaseSprite(entry.dexNumber)" [alt]="entry.name" loading="lazy" />
+                <span class="pd-evo-card__num">#{{ entry.dexNumber }}</span>
+                <span class="pd-evo-card__name">{{ entry.name }}</span>
+              </a>
+            }
+          </div>
+
+          <!-- Body chain (only if different family) -->
+          @if (!sameFamily()) {
+            <div class="pd-evo-chain pd-evo-chain--second">
+              @for (entry of bodyChain(); track entry.dexNumber; let i = $index) {
+                @if (i > 0) {
+                  <div class="pd-evo-arrow">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+                    @if (bodyChain()[i - 1].evolvesAtLevel) {
+                      <span class="pd-evo-level">Lv {{ bodyChain()[i - 1].evolvesAtLevel }}</span>
+                    }
+                  </div>
+                }
+                <a class="pd-evo-card" [routerLink]="evoCardRoute(entry.dexNumber)" [class.pd-evo-card--current]="entry.dexNumber === headId() || entry.dexNumber === bodyId()">
+                  <img class="pd-evo-card__img" [src]="imageSvc.getBaseSprite(entry.dexNumber)" [alt]="entry.name" loading="lazy" />
+                  <span class="pd-evo-card__num">#{{ entry.dexNumber }}</span>
+                  <span class="pd-evo-card__name">{{ entry.name }}</span>
+                </a>
+              }
+            </div>
+          }
+
+        </div>
+      </div>
+
+    </div><!-- /pd-inner -->
+  }
+
+</div>
