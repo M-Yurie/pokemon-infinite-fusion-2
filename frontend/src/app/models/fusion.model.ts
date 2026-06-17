@@ -9,9 +9,7 @@ export interface DisplayCard {
   head: Pokemon;       // for base cards: the pokemon itself; for fusions: the head
   body: Pokemon | null; // null for base cards
   isLegendary: boolean;
-  spriteCount?: number;
-  showBadge?: boolean;
-  badgeLabel?: string;
+  usesGeneratedSprite?: boolean;
 }
 
 export type FusionPosition = 'either' | 'head' | 'body';

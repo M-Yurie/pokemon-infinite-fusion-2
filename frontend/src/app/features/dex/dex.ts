@@ -40,6 +40,7 @@ export class Dex implements AfterViewInit, OnDestroy {
   readonly loadingMore    = signal(false);
   readonly displayedCards = signal<DisplayCard[]>([]);
   readonly spritePrefs    = signal<Map<string, string>>(new Map());
+  readonly badgeMap       = signal<Map<string, { count: number; label: string }>>(new Map());
   readonly galleryFusion  = signal<DisplayCard | null>(null);
   readonly galleryItems   = signal<{ url: string; label: string; variant: string; lastModified: number }[]>([]);
   readonly searchOpen     = signal(false);
@@ -174,6 +175,7 @@ export class Dex implements AfterViewInit, OnDestroy {
     this.isLoadingPage = true;
 
     this.rebuildTimer = setTimeout(() => {
+      this.badgeMap.set(new Map());
       this.pool = this.fusionSvc.buildPool(pokemon, filters);
       this.poolOffset = 0;
       const first = this.fusionSvc.getPage(this.pool, 0, 36);
@@ -251,11 +253,14 @@ export class Dex implements AfterViewInit, OnDestroy {
       if (!card.isFusion || !card.body) continue;
       await new Promise<void>(resolve => setTimeout(resolve, 20));
       const count = await this.imageSvc.getSpriteCount(card.head.id, card.body.id);
-      card.spriteCount = count;
-      card.showBadge   = count > 1;
-      card.badgeLabel  = count >= 10 ? '+' : String(count);
-      // Spread to give Angular a new array reference so the template re-evaluates card fields
-      this.displayedCards.update(c => [...c]);
+      if (count > 1) {
+        const label = count >= 10 ? '+' : String(count);
+        this.badgeMap.update(m => {
+          const next = new Map(m);
+          next.set(card.id, { count, label });
+          return next;
+        });
+      }
     }
   }
 
@@ -443,6 +448,7 @@ export class Dex implements AfterViewInit, OnDestroy {
         fallback.style.display            = 'block';
       };
       probe.src = src;
+      card.usesGeneratedSprite = true;
     } else {
       const placeholder = parent.querySelector('.dex-card__sprite-placeholder') as HTMLElement | null;
       if (placeholder) placeholder.style.display = 'flex';

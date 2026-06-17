@@ -310,6 +310,7 @@
           <div
             class="dex-card"
             [class.dex-card--favorited]="isFavorite(card.id)"
+            [class.dex-card--generated]="card.usesGeneratedSprite"
             [style.--primary-type-color]="typeColor(card.types[0])"
           >
 
@@ -329,12 +330,12 @@
                 <span>?</span>
               </div>
               <div class="dex-card__glow"></div>
-              @if (card.showBadge) {
+              @if (badgeMap().get(card.id); as badge) {
                 <div
                   class="dex-card__sprite-badge"
                   (click)="openGallery(card, $event)"
-                  [title]="(card.spriteCount ?? 0) + ' custom sprites'"
-                >{{ card.badgeLabel }}</div>
+                  [title]="badge.count + ' custom sprites'"
+                >{{ badge.label }}</div>
               }
             </div>
 

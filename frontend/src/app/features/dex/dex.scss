@@ -624,6 +624,12 @@
   cursor: pointer;
   transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
 
+  &--generated {
+    .dex-card__sprite-area {
+      background: rgba(255, 255, 255, 0.04);
+    }
+  }
+
   &:hover {
     transform: translateY(-4px);
     border-color: color-mix(in srgb, var(--primary-type-color) 40%, transparent);
