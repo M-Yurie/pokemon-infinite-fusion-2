@@ -20,4 +20,11 @@ export interface DexFilters {
   types: string[];
   mono: boolean;           // show only single-type entries
   ability: string | null;
-  sh
+  showLegendaries: boolean;
+  showFavorites: boolean;
+  showOriginal: boolean;   // show base Pokémon cards
+  showFusion: boolean;     // show fusion cards
+  sortBy: SortOption;
+  favoriteIds: Set<string>;
+  disabledIds: Set<number>;
+}

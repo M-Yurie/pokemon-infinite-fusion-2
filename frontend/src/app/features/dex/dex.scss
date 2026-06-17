@@ -330,7 +330,8 @@
   max-width: 1264px;
 
   &--open {
-    max-height: 600px;
+    max-height: 900px;   // tall enough for all 3 toggles + type pills
+    overflow: visible;   // allow ability dropdown to escape bounds
     opacity: 1;
     margin-bottom: 1.25rem;
   }
@@ -430,6 +431,24 @@
     background: color-mix(in srgb, var(--tc) 15%, transparent);
     color: var(--tc);
   }
+
+  // "Mono" special pill — uses primary color scheme
+  &--mono {
+    --tc: #7C6CFF;
+    color: rgba(124, 108, 255, 0.7);
+    border-color: rgba(124, 108, 255, 0.3);
+
+    &.dex-type-pill--active {
+      background: rgba(124, 108, 255, 0.2);
+      color: #7C6CFF;
+      border-color: rgba(124, 108, 255, 0.6);
+    }
+
+    &:hover {
+      background: rgba(124, 108, 255, 0.12);
+      color: #7C6CFF;
+    }
+  }
 }
 
 // ─── Ability filter ────────────────────────────────────────────────────
@@ -437,6 +456,10 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+
+  &__wrap {
+    position: relative;
+  }
 
   &__input-wrap {
     display: flex;
@@ -478,6 +501,37 @@
     transition: color $transition-fast;
 
     &:hover { color: rgba(255, 255, 255, 0.6); }
+  }
+
+  &__dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background: var(--color-surface);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: $radius-xl;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+    z-index: 200;
+    max-height: 220px;
+    overflow-y: auto;
+    animation: dropIn 0.15s ease;
+  }
+
+  &__option {
+    width: 100%;
+    text-align: left;
+    padding: 0.5rem 1rem;
+    font-size: $font-size-sm;
+    font-family: $font-family-base;
+    color: rgba(255, 255, 255, 0.7);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: background $transition-fast;
+
+    &:hover { background: rgba(255, 255, 255, 0.04); }
   }
 }
 
@@ -586,12 +640,28 @@
     overflow: hidden;
   }
 
-  &__sprite {
+  // img-based sprite (replaces CSS background-position approach)
+  &__sprite-img {
     width: 192px;
     height: 192px;
+    image-rendering: pixelated;
+    object-fit: contain;
+    display: block;
     transition: transform 0.35s ease;
 
     .dex-card:hover & { transform: scale(1.08); }
+  }
+
+  // Fallback shown when image 404s
+  &__sprite-placeholder {
+    width: 192px;
+    height: 192px;
+    background: rgba(255, 255, 255, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: rgba(255, 255, 255, 0.2);
   }
 
   &__glow {
@@ -817,12 +887,28 @@
     flex-direction: column;
     align-items: center;
     gap: 0.375rem;
+    cursor: pointer;
+    border-radius: $radius-xl;
+    padding: 0.375rem;
+    border: 2px solid transparent;
+    transition: border-color $transition-fast;
+
+    &--selected {
+      border-color: #7C6CFF;
+      background: rgba(124, 108, 255, 0.08);
+    }
+
+    &:hover:not(&--selected) {
+      border-color: rgba(255, 255, 255, 0.12);
+    }
   }
 
   &__sprite-img {
     width: 192px;
     height: 192px;
     image-rendering: pixelated;
+    object-fit: contain;
+    display: block;
   }
 
   &__sprite-label {

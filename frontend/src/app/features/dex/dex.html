@@ -1,7 +1,7 @@
 <!-- ══════════════════════════════════════════════════════════ DEX PAGE ══ -->
 <div class="dex-page">
 
-  <!-- ─── Overlays (close dropdowns / search on outside click) ────────────── -->
+  <!-- ─── Overlays ────────────────────────────────────────────────────────── -->
   @if (sortOpen()) {
     <div class="dex-overlay" (click)="closeSortOpen()"></div>
   }
@@ -25,13 +25,17 @@
           </button>
         </div>
         <div class="dex-modal__grid">
-          @if (!galleryUrls().length) {
+          @if (!galleryItems().length) {
             <p class="dex-modal__loading">Loading sprites…</p>
           }
-          @for (url of galleryUrls(); track url; let i = $index) {
-            <div class="dex-modal__sprite-item">
-              <img class="dex-modal__sprite-img" [src]="url" [alt]="variantLabel(i)" loading="lazy" />
-              <span class="dex-modal__sprite-label">{{ variantLabel(i) }}</span>
+          @for (item of galleryItems(); track item.variant) {
+            <div
+              class="dex-modal__sprite-item"
+              [class.dex-modal__sprite-item--selected]="isSelectedVariant(galleryFusion()!.id, item.variant)"
+              (click)="selectSpriteVariant(item.variant, $event)"
+            >
+              <img class="dex-modal__sprite-img" [src]="item.url" [alt]="item.label" loading="lazy" />
+              <span class="dex-modal__sprite-label">{{ item.label }}</span>
             </div>
           }
         </div>
@@ -168,11 +172,17 @@
           <div class="dex-filters__col">
             <div class="dex-filters__col-header">
               <span class="dex-filters__label">FILTER BY TYPE</span>
-              @if (filters().types.length > 0) {
+              @if (filters().types.length > 0 || filters().mono) {
                 <button class="dex-filters__clear-link" (click)="clearTypes()">Clear</button>
               }
             </div>
             <div class="dex-type-pills">
+              <!-- Mono special pill -->
+              <button
+                class="dex-type-pill dex-type-pill--mono"
+                [class.dex-type-pill--active]="filters().mono"
+                (click)="toggleMono()"
+              >Mono</button>
               @for (type of allTypes; track type) {
                 <button
                   class="dex-type-pill"
@@ -186,36 +196,60 @@
 
           <!-- Right: Ability + Show toggles -->
           <div class="dex-filters__col">
+            <!-- Ability filter with suggestions -->
             <div class="dex-ability">
               <span class="dex-filters__label">ABILITY</span>
-              <div
-                class="dex-ability__input-wrap"
-                [class.dex-ability__input-wrap--open]="abilityOpen()"
-              >
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                </svg>
-                <input
-                  class="dex-ability__input"
-                  type="text"
-                  placeholder="Filter by ability…"
-                  [value]="abilityQuery()"
-                  (input)="onAbilityInput($any($event.target).value)"
-                  (focus)="toggleAbilityOpen()"
-                />
-                @if (abilityQuery()) {
-                  <button class="dex-ability__clear" (click)="clearAbility()">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
-                      <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-                    </svg>
-                  </button>
+              <div class="dex-ability__wrap">
+                <div
+                  class="dex-ability__input-wrap"
+                  [class.dex-ability__input-wrap--open]="abilityOpen()"
+                >
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                  </svg>
+                  <input
+                    class="dex-ability__input"
+                    type="text"
+                    placeholder="Filter by ability…"
+                    [value]="abilityQuery()"
+                    (input)="onAbilityInput($any($event.target).value)"
+                    (focus)="toggleAbilityOpen()"
+                    autocomplete="off"
+                  />
+                  @if (abilityQuery()) {
+                    <button class="dex-ability__clear" (click)="clearAbility()">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
+                        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                      </svg>
+                    </button>
+                  }
+                </div>
+                @if (abilityOpen() && abilityOptions().length > 0) {
+                  <div class="dex-ability__dropdown">
+                    @for (name of abilityOptions(); track name) {
+                      <button class="dex-ability__option" (click)="selectAbility(name)">{{ name }}</button>
+                    }
+                  </div>
                 }
               </div>
             </div>
 
+            <!-- Show in results toggles -->
             <div class="dex-toggles">
               <span class="dex-filters__label">SHOW IN RESULTS</span>
               <div class="dex-toggles__list">
+                <label class="dex-toggle">
+                  <button class="dex-toggle__track" [class.dex-toggle__track--on]="filters().showOriginal" (click)="toggleOriginal()">
+                    <span class="dex-toggle__thumb"></span>
+                  </button>
+                  <span class="dex-toggle__label">Original Pokémon</span>
+                </label>
+                <label class="dex-toggle">
+                  <button class="dex-toggle__track" [class.dex-toggle__track--on]="filters().showFusion" (click)="toggleFusionType()">
+                    <span class="dex-toggle__thumb"></span>
+                  </button>
+                  <span class="dex-toggle__label">Fusion Pokémon</span>
+                </label>
                 <label class="dex-toggle">
                   <button class="dex-toggle__track" [class.dex-toggle__track--on]="filters().showLegendaries" (click)="toggleLegendaries()">
                     <span class="dex-toggle__thumb"></span>
@@ -259,9 +293,19 @@
 
             <!-- Sprite area -->
             <div class="dex-card__sprite-area">
-              <div class="dex-card__sprite" [style]="spriteStyle(card.head.id, card.body.id)"></div>
+              <img
+                class="dex-card__sprite-img"
+                [src]="getCardSpriteUrl(card)"
+                [alt]="card.name"
+                loading="lazy"
+                (error)="$any($event.target).style.display='none'; $any($event.target).nextElementSibling.style.display='flex'"
+              />
+              <!-- Fallback placeholder (shown on 404) -->
+              <div class="dex-card__sprite-placeholder" style="display:none">
+                <span>?</span>
+              </div>
               <div class="dex-card__glow"></div>
-              @if (spriteCount(card.id) > 1) {
+              @if (card.isFusion && spriteCount(card.id) > 1) {
                 <button
                   class="dex-card__sprite-count"
                   (click)="openGallery(card, $event)"
@@ -272,7 +316,7 @@
 
             <!-- Info bar -->
             <div class="dex-card__info">
-              <p class="dex-card__id">#{{ card.head.id }}.{{ card.body.id }}</p>
+              <p class="dex-card__id">#{{ card.id }}</p>
               <p class="dex-card__name">{{ card.name }}</p>
               <div class="dex-card__bottom-row">
                 <div class="dex-card__types">
@@ -295,12 +339,9 @@
 
           </div>
         }
-
-        <!-- Infinite-scroll sentinel -->
-        <div #sentinel class="dex-sentinel"></div>
       </div>
 
-      <!-- Loading-more indicator (pool rebuild / initial) -->
+      <!-- Loading-more indicator -->
       @if (loadingMore()) {
         <div class="dex-dots dex-dots--more">
           @for (c of dots; track c) {
@@ -309,6 +350,9 @@
         </div>
       }
     }
+
+    <!-- Infinite-scroll sentinel — always in DOM so IO can observe it -->
+    <div #sentinel class="dex-sentinel"></div>
 
   </div>
 </div>

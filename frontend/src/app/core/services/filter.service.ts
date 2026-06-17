@@ -6,9 +6,11 @@ const DEFAULT_FILTERS: DexFilters = {
   selectedPokemon: [],
   position: 'either',
   types: [],
+  mono: false,
   ability: null,
   showLegendaries: true,
   showFavorites: false,
+  showOriginal: true,
   showFusion: true,
   sortBy: 'dex',
   favoriteIds: new Set<string>(),
@@ -48,7 +50,11 @@ export class FilterService {
   }
 
   clearTypes(): void {
-    this.filters.update(f => ({ ...f, types: [] }));
+    this.filters.update(f => ({ ...f, types: [], mono: false }));
+  }
+
+  toggleMono(): void {
+    this.filters.update(f => ({ ...f, mono: !f.mono }));
   }
 
   setAbility(ability: string | null): void {
@@ -61,6 +67,14 @@ export class FilterService {
 
   toggleFavorites(): void {
     this.filters.update(f => ({ ...f, showFavorites: !f.showFavorites }));
+  }
+
+  toggleOriginal(): void {
+    this.filters.update(f => ({ ...f, showOriginal: !f.showOriginal }));
+  }
+
+  toggleFusion(): void {
+    this.filters.update(f => ({ ...f, showFusion: !f.showFusion }));
   }
 
   setSortBy(sortBy: SortOption): void {

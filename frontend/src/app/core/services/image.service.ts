@@ -1,51 +1,81 @@
 import { Injectable } from '@angular/core';
 
+const BASE_CDN = 'https://ifd-spaces.sfo2.cdn.digitaloceanspaces.com/custom/';
+const SPRITE_PREF_KEY = (headId: number, bodyId: number) => `sprite_pref_${headId}_${bodyId}`;
+const VARIANTS = 'abcdefghijklmnopqrstuvwxyz';
+
 @Injectable({ providedIn: 'root' })
 export class ImageService {
-  getSpritePosition(headId: number, bodyId: number): { x: number; y: number } {
-    const col = bodyId % 10 === 0 ? 10 : bodyId % 10;
-    const row = Math.ceil(bodyId / 10);
-    return { x: (col - 1) * 192, y: (row - 1) * 192 };
+  // ─── URL builders ─────────────────────────────────────────────────────────
+  getBaseSprite(id: number): string {
+    return `${BASE_CDN}${id}.png`;
   }
 
-  getSpriteSheetStyle(headId: number, bodyId: number): Record<string, string> {
-    const { x, y } = this.getSpritePosition(headId, bodyId);
-    return {
-      'background-image':    `url('/assets/sprites/generated/${headId}.png')`,
-      'background-repeat':   'no-repeat',
-      'background-size':     '1920px auto',
-      'background-position': `-${x}px -${y}px`,
-      'image-rendering':     'pixelated',
-    };
+  getFusionSprite(headId: number, bodyId: number): string {
+    return `${BASE_CDN}${headId}.${bodyId}.png`;
   }
 
-  // Count existing custom sprites (default + variants a–z). Stops at first 404.
+  getFusionVariantSprite(headId: number, bodyId: number, variant: string): string {
+    return `${BASE_CDN}${headId}.${bodyId}${variant}.png`;
+  }
+
+  /** Returns the user-preferred sprite URL (reads localStorage). Falls back to default. */
+  getDisplaySprite(headId: number, bodyId: number): string {
+    const pref = localStorage.getItem(SPRITE_PREF_KEY(headId, bodyId)) ?? '';
+    return pref
+      ? this.getFusionVariantSprite(headId, bodyId, pref)
+      : this.getFusionSprite(headId, bodyId);
+  }
+
+  saveSpritePref(headId: number, bodyId: number, variant: string): void {
+    localStorage.setItem(SPRITE_PREF_KEY(headId, bodyId), variant);
+  }
+
+  getSpritePref(headId: number, bodyId: number): string {
+    return localStorage.getItem(SPRITE_PREF_KEY(headId, bodyId)) ?? '';
+  }
+
+  // ─── Existence checks ─────────────────────────────────────────────────────
   async getSpriteCount(headId: number, bodyId: number): Promise<number> {
-    const base = `/assets/sprites/custom/${headId}.${bodyId}`;
+    const base = `${BASE_CDN}${headId}.${bodyId}`;
     if (!(await this.exists(`${base}.png`))) return 0;
 
     let count = 1;
-    for (const char of 'abcdefghijklmnopqrstuvwxyz') {
+    for (const char of VARIANTS) {
       if (!(await this.exists(`${base}${char}.png`))) break;
       count++;
-      if (count >= 10) break; // display cap: "+"
+      if (count >= 10) break;
     }
     return count;
   }
 
-  // Returns all custom sprite URLs for a fusion.
-  async getCustomSpriteUrls(headId: number, bodyId: number): Promise<string[]> {
-    const base = `/assets/sprites/custom/${headId}.${bodyId}`;
-    const baseUrl = `${base}.png`;
-    if (!(await this.exists(baseUrl))) return [];
+  async getAllSpriteUrls(headId: number, bodyId: number): Promise<{ url: string; label: string; variant: string }[]> {
+    const base = `${BASE_CDN}${headId}.${bodyId}`;
+    const defaultUrl = `${base}.png`;
+    if (!(await this.exists(defaultUrl))) return [];
 
-    const urls: string[] = [baseUrl];
-    for (const char of 'abcdefghijklmnopqrstuvwxyz') {
+    const results: { url: string; label: string; variant: string }[] = [
+      { url: defaultUrl, label: 'Default', variant: '' },
+    ];
+
+    for (const char of VARIANTS) {
       const url = `${base}${char}.png`;
       if (!(await this.exists(url))) break;
-      urls.push(url);
+      results.push({ url, label: char.toUpperCase(), variant: char });
     }
-    return urls;
+
+    return results;
+  }
+
+  /** HEAD request to get Last-Modified date (for Age sort). Returns epoch on failure. */
+  async getLastModified(url: string): Promise<Date> {
+    try {
+      const res = await fetch(url, { method: 'HEAD' });
+      const lm = res.headers.get('Last-Modified');
+      return lm ? new Date(lm) : new Date(0);
+    } catch {
+      return new Date(0);
+    }
   }
 
   private async exists(url: string): Promise<boolean> {
