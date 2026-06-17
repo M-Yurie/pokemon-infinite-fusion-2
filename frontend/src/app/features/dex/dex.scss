@@ -652,6 +652,15 @@
     .dex-card:hover & { transform: scale(1.08); }
   }
 
+  // Sprite sheet shown when custom CDN image 404s (fusions only)
+  .sprite-fallback {
+    width: 192px;
+    height: 192px;
+    image-rendering: pixelated;
+    background-repeat: no-repeat;
+    display: none;
+  }
+
   // Fallback shown when image 404s
   &__sprite-placeholder {
     width: 192px;
@@ -680,25 +689,25 @@
   }
 
   // Sprite-count badge (top-right of sprite area)
-  &__sprite-count {
+  &__sprite-badge {
     position: absolute;
-    top: 0.375rem;
-    right: 0.375rem;
+    top: 8px;
+    right: 8px;
     width: 20px;
     height: 20px;
-    border-radius: $radius-full;
+    border-radius: 50%;
     background: rgba(124, 108, 255, 0.85);
     color: #fff;
-    font-size: 0.625rem;
+    font-size: 10px;
     font-weight: $font-weight-bold;
     display: flex;
     align-items: center;
     justify-content: center;
-    border: none;
     cursor: pointer;
     z-index: 2;
     line-height: 1;
-    transition: transform $transition-fast, background $transition-fast;
+    user-select: none;
+    transition: transform 0.15s, background 0.15s;
 
     &:hover {
       transform: scale(1.15);
@@ -930,23 +939,23 @@
 
 // ─── Sort direction toggle ─────────────────────────────────────────────
 .dex-sort-dir {
-  width: 28px;
-  height: 28px;
+  width: 39px;
+  height: 39px;
   border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--color-surface);
+  background: #1D2230;
   border: 1px solid rgba(255, 255, 255, 0.08);
   cursor: pointer;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(255, 255, 255, 0.65);
   flex-shrink: 0;
-  transition: background $transition-normal, border-color $transition-normal, color $transition-normal;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
 
   &:hover {
-    background: rgba(124, 108, 255, 0.12);
-    border-color: rgba(124, 108, 255, 0.3);
-    color: #fff;
+    background: rgba(124, 108, 255, 0.15);
+    border-color: rgba(124, 108, 255, 0.35);
+    color: #7C6CFF;
   }
 }
 

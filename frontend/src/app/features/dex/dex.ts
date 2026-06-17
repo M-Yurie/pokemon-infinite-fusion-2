@@ -39,7 +39,6 @@ export class Dex implements AfterViewInit, OnDestroy {
   readonly loading        = signal(true);
   readonly loadingMore    = signal(false);
   readonly displayedCards = signal<DisplayCard[]>([]);
-  readonly spriteCounts   = signal<Map<string, number>>(new Map());
   readonly spritePrefs    = signal<Map<string, string>>(new Map());
   readonly galleryFusion  = signal<DisplayCard | null>(null);
   readonly galleryItems   = signal<{ url: string; label: string; variant: string; lastModified: number }[]>([]);
@@ -185,7 +184,7 @@ export class Dex implements AfterViewInit, OnDestroy {
           this.hasMore.set(this.pool.length > 36);
           this.loadingMore.set(false);
           this.isLoadingPage = false;
-          this.spriteCounts.set(new Map());
+          void this.loadSpriteCountsForBatch(this.displayedCards());
         });
       } else {
         this.displayedCards.set(first);
@@ -193,7 +192,7 @@ export class Dex implements AfterViewInit, OnDestroy {
         this.hasMore.set(this.pool.length > first.length);
         this.loadingMore.set(false);
         this.isLoadingPage = false;
-        this.spriteCounts.set(new Map());
+        void this.loadSpriteCountsForBatch(first);
       }
     }, 0);
   }
@@ -210,9 +209,13 @@ export class Dex implements AfterViewInit, OnDestroy {
 
     if (sortBy === 'age') {
       this.isLoadingPage = true;
-      void this.sortByAgeAndSet(slice, false, sortDir).then(() => { this.isLoadingPage = false; });
+      void this.sortByAgeAndSet(slice, false, sortDir).then(() => {
+        this.isLoadingPage = false;
+        void this.loadSpriteCountsForBatch(slice);
+      });
     } else {
       this.displayedCards.update(prev => [...prev, ...slice]);
+      void this.loadSpriteCountsForBatch(slice);
     }
   }
 
@@ -230,9 +233,9 @@ export class Dex implements AfterViewInit, OnDestroy {
     }));
 
     if (sortDir === 'asc') {
-      withTs.sort((a, b) => a.ts - b.ts); // oldest first
+      withTs.sort((a, b) => a.ts - b.ts);
     } else {
-      withTs.sort((a, b) => b.ts - a.ts); // newest first
+      withTs.sort((a, b) => b.ts - a.ts);
     }
     const sorted = withTs.map(x => x.card);
 
@@ -240,6 +243,19 @@ export class Dex implements AfterViewInit, OnDestroy {
       this.displayedCards.set(sorted);
     } else {
       this.displayedCards.update(prev => [...prev, ...sorted]);
+    }
+  }
+
+  private async loadSpriteCountsForBatch(cards: DisplayCard[]): Promise<void> {
+    for (const card of cards) {
+      if (!card.isFusion || !card.body) continue;
+      await new Promise<void>(resolve => setTimeout(resolve, 20));
+      const count = await this.imageSvc.getSpriteCount(card.head.id, card.body.id);
+      card.spriteCount = count;
+      card.showBadge   = count > 1;
+      card.badgeLabel  = count >= 10 ? '+' : String(count);
+      // Spread to give Angular a new array reference so the template re-evaluates card fields
+      this.displayedCards.update(c => [...c]);
     }
   }
 
@@ -400,54 +416,38 @@ export class Dex implements AfterViewInit, OnDestroy {
       : this.imageSvc.getFusionSprite(card.head.id, card.body.id);
   }
 
-  onCardImageLoaded(card: DisplayCard): void {
-    if (!card.isFusion || !card.body) return;
-    this.imageSvc.getSpriteCount(card.head.id, card.body.id).then(count => {
-      if (count > 1) {
-        this.spriteCounts.update(m => {
-          const next = new Map(m);
-          next.set(card.id, count);
-          return next;
-        });
-      }
-    });
-  }
-
   onSpriteError(card: DisplayCard, imgEl: HTMLImageElement): void {
     imgEl.style.display = 'none';
     const parent = imgEl.parentElement;
     if (!parent) return;
 
     if (card.isFusion && card.body) {
+      const headId = card.head.id;
       const bodyId = card.body.id;
       const col = bodyId % 10 === 0 ? 10 : bodyId % 10;
       const row = Math.ceil(bodyId / 10);
       const x = (col - 1) * 192;
       const y = (row - 1) * 192;
-      const sheetEl = parent.querySelector('.dex-card__sprite-sheet') as HTMLElement | null;
-      if (sheetEl) {
-        sheetEl.style.display = 'block';
-        sheetEl.style.backgroundImage = `url('/assets/sprites/generated/${card.head.id}.png')`;
-        sheetEl.style.backgroundPosition = `-${x}px -${y}px`;
-        sheetEl.style.backgroundSize = '1920px 1920px';
-      }
-      this.imageSvc.getSpriteCount(card.head.id, card.body.id).then(count => {
-        if (count > 1) {
-          this.spriteCounts.update(m => {
-            const next = new Map(m);
-            next.set(card.id, count);
-            return next;
-          });
-        }
-      });
+
+      const fallback = parent.querySelector('.sprite-fallback') as HTMLElement | null;
+      if (!fallback) return;
+
+      const src = `/assets/sprites/generated/${headId}.png`;
+      const probe = new Image();
+      probe.onload = () => {
+        const scaledW = probe.naturalWidth * 2;
+        const scaledH = probe.naturalHeight * 2;
+        fallback.style.backgroundImage    = `url('${src}')`;
+        fallback.style.backgroundPosition = `-${x}px -${y}px`;
+        fallback.style.backgroundSize     = `${scaledW}px ${scaledH}px`;
+        fallback.style.display            = 'block';
+      };
+      probe.src = src;
     } else {
       const placeholder = parent.querySelector('.dex-card__sprite-placeholder') as HTMLElement | null;
       if (placeholder) placeholder.style.display = 'flex';
     }
   }
-
-  spriteCount(cardId: string): number    { return this.spriteCounts().get(cardId) ?? 0; }
-  spriteCountLabel(count: number): string { return count >= 10 ? '+' : String(count); }
 
   isSelectedVariant(cardId: string, variant: string): boolean {
     return (this.spritePrefs().get(cardId) ?? '') === variant;

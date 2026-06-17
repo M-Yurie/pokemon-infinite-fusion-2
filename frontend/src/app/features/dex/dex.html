@@ -320,22 +320,21 @@
                 [src]="getCardSpriteUrl(card)"
                 [alt]="card.name"
                 loading="lazy"
-                (load)="onCardImageLoaded(card)"
                 (error)="onSpriteError(card, $any($event.target))"
               />
               <!-- Fusion fallback: generated sprite sheet (shown on 404) -->
-              <div class="dex-card__sprite-sheet" style="display:none; width:192px; height:192px; image-rendering:pixelated;"></div>
+              <div class="sprite-fallback"></div>
               <!-- Base fallback: ? placeholder (shown on 404) -->
               <div class="dex-card__sprite-placeholder" style="display:none">
                 <span>?</span>
               </div>
               <div class="dex-card__glow"></div>
-              @if (card.isFusion && spriteCount(card.id) > 1) {
-                <button
-                  class="dex-card__sprite-count"
+              @if (card.showBadge) {
+                <div
+                  class="dex-card__sprite-badge"
                   (click)="openGallery(card, $event)"
-                  [title]="spriteCount(card.id) + ' custom sprites'"
-                >{{ spriteCountLabel(spriteCount(card.id)) }}</button>
+                  [title]="(card.spriteCount ?? 0) + ' custom sprites'"
+                >{{ card.badgeLabel }}</div>
               }
             </div>
 
