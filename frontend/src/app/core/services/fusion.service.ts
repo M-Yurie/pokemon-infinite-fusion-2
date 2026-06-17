@@ -48,10 +48,12 @@ export class FusionService {
   }
 
   /**
-   * Builds the pool in interleaved order:
-   *   Group N (N = each body pokémon by id):
-   *     1. base(N)
-   *     2. fusion(1.N), fusion(2.N), ... fusion(524.N)
+   * Builds the pool in two phases:
+   *   Phase 1: all base Pokémon in id order
+   *   Phase 2: all fusions, outer=body, inner=head
+   *     body=1: fusion(1.1), fusion(2.1) ... fusion(524.1)
+   *     body=2: fusion(1.2), fusion(2.2) ... fusion(524.2)
+   *     ...
    */
   buildPool(allPokemon: Pokemon[], filters: DexFilters): PoolItem[] {
     const {
@@ -60,46 +62,44 @@ export class FusionService {
       favoriteIds, disabledIds, sortBy, sortDir,
     } = filters;
 
-    // Ensure stable id-ascending order
     const enabled = allPokemon
       .filter(p => !disabledIds.has(p.id))
       .sort((a, b) => a.id - b.id);
 
+    const baseFilters = { showLegendaries, types, mono, ability, showFavorites, favoriteIds };
     const items: PoolItem[] = [];
 
-    // Outer loop: body pokémon (= group N)
-    for (const bodyPok of enabled) {
-      // 1. Base card for this group
-      if (showOriginal) {
+    // Phase 1: base Pokémon
+    if (showOriginal) {
+      for (const p of enabled) {
         const passesSelection =
           selectedPokemon.length === 0 ||
-          selectedPokemon.some(s => s.id === bodyPok.id);
-        if (
-          passesSelection &&
-          this.passesBaseFilters(bodyPok, { showLegendaries, types, mono, ability, showFavorites, favoriteIds })
-        ) {
-          items.push({ kind: 'base', p: bodyPok });
+          selectedPokemon.some(s => s.id === p.id);
+        if (passesSelection && this.passesBaseFilters(p, baseFilters)) {
+          items.push({ kind: 'base', p });
         }
       }
+    }
 
-      // 2. All fusions where body = bodyPok, ordered by headId
-      if (showFusion) {
+    // Phase 2: fusions (outer = body, inner = head)
+    if (showFusion) {
+      for (const bodyPok of enabled) {
         for (const headPok of enabled) {
           if (!this.passesFusionSelection(headPok, bodyPok, selectedPokemon, position)) continue;
-          if (!this.passesFusionFilters(headPok, bodyPok, { showLegendaries, types, mono, ability, showFavorites, favoriteIds })) continue;
+          if (!this.passesFusionFilters(headPok, bodyPok, baseFilters)) continue;
           items.push({ kind: 'fusion', h: headPok, b: bodyPok });
         }
       }
     }
 
-    // Apply stat sorts (dex# IS the natural interleaved order)
+    // Stat sorts apply on top of the natural order; dex = natural order
     if (sortBy !== 'dex') {
       items.sort((x, y) => {
         const av = this.itemStatValue(x, sortBy);
         const bv = this.itemStatValue(y, sortBy);
         return sortDir === 'asc' ? av - bv : bv - av;
       });
-    } else if (sortBy === 'dex' && sortDir === 'desc') {
+    } else if (sortDir === 'desc') {
       items.reverse();
     }
 

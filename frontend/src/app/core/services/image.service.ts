@@ -50,9 +50,13 @@ export class ImageService {
 
   // ─── Sprite count & gallery URLs ──────────────────────────────────────────
   async getSpriteCount(headId: number, bodyId: number): Promise<number> {
+    const key = this.getCountCacheKey(headId, bodyId);
+    const cached = this.getCachedCount(key);
+    if (cached !== null) return cached;
+
     const base = `${BASE_CDN}${headId}.${bodyId}`;
     const def = await this.checkUrl(`${base}.png`);
-    if (!def.ok) return 0;
+    if (!def.ok) { this.setCachedCount(key, 0); return 0; }
 
     let count = 1;
     for (const char of VARIANTS) {
@@ -61,12 +65,18 @@ export class ImageService {
       count++;
       if (count >= 10) break;
     }
+    this.setCachedCount(key, count);
     return count;
   }
 
   async getSpriteCountForBase(id: number): Promise<number> {
+    const key = this.getCountCacheKey(id);
+    const cached = this.getCachedCount(key);
+    if (cached !== null) return cached;
+
     const base = await this.checkUrl(this.getBaseSprite(id));
-    if (!base.ok) return 0;
+    if (!base.ok) { this.setCachedCount(key, 0); return 0; }
+
     let count = 1;
     for (const char of VARIANTS) {
       const r = await this.checkUrl(this.getBaseSpriteVariant(id, char));
@@ -74,6 +84,7 @@ export class ImageService {
       count++;
       if (count >= 10) break;
     }
+    this.setCachedCount(key, count);
     return count;
   }
 
@@ -96,6 +107,10 @@ export class ImageService {
   }
 
   async getLastSpriteUrl(headId: number, bodyId: number): Promise<string> {
+    const cacheKey = `lu_${headId}_${bodyId}`;
+    const cached = sessionStorage.getItem(cacheKey);
+    if (cached) return cached;
+
     const base = `${BASE_CDN}${headId}.${bodyId}`;
     let lastUrl = `${base}.png`;
     for (const char of VARIANTS) {
@@ -105,6 +120,7 @@ export class ImageService {
       lastUrl = url;
       if (char === 'j') break; // safety cap at 10 variants
     }
+    try { sessionStorage.setItem(cacheKey, lastUrl); } catch {}
     return lastUrl;
   }
 
@@ -136,6 +152,19 @@ export class ImageService {
   }
 
   // ─── Internal ─────────────────────────────────────────────────────────────
+  private getCountCacheKey(headId: number, bodyId?: number): string {
+    return bodyId !== undefined ? `sc_${headId}_${bodyId}` : `sc_${headId}`;
+  }
+
+  private getCachedCount(key: string): number | null {
+    const val = sessionStorage.getItem(key);
+    return val !== null ? parseInt(val, 10) : null;
+  }
+
+  private setCachedCount(key: string, count: number): void {
+    try { sessionStorage.setItem(key, String(count)); } catch {}
+  }
+
   // Uses Image loading instead of fetch/HEAD to avoid CORS restrictions.
   // DigitalOcean Spaces blocks cross-origin HEAD requests but allows image loads.
   private checkUrl(url: string): Promise<UrlCheck> {

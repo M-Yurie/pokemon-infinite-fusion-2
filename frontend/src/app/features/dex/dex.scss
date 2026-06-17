@@ -699,25 +699,25 @@
     position: absolute;
     top: 8px;
     right: 8px;
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
     border-radius: 50%;
-    background: rgba(124, 108, 255, 0.85);
+    background: transparent;
+    border: 1.5px solid rgba(255, 255, 255, 0.75);
     color: #fff;
-    font-size: 10px;
-    font-weight: $font-weight-bold;
+    font-size: 12px;
+    font-weight: 700;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     z-index: 2;
-    line-height: 1;
     user-select: none;
-    transition: transform 0.15s, background 0.15s;
+    transition: border-color 0.15s, transform 0.15s;
 
     &:hover {
+      border-color: #fff;
       transform: scale(1.15);
-      background: rgba(124, 108, 255, 1);
     }
   }
 
