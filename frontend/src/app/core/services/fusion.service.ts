@@ -92,8 +92,8 @@ export class FusionService {
       }
     }
 
-    // Apply stat sorts (dex# IS the natural interleaved order; age handled per-batch in component)
-    if (sortBy !== 'dex' && sortBy !== 'age') {
+    // Apply stat sorts (dex# IS the natural interleaved order)
+    if (sortBy !== 'dex') {
       items.sort((x, y) => {
         const av = this.itemStatValue(x, sortBy);
         const bv = this.itemStatValue(y, sortBy);

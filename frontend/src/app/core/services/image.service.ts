@@ -40,6 +40,14 @@ export class ImageService {
     return localStorage.getItem(SPRITE_PREF_KEY(headId, bodyId)) ?? '';
   }
 
+  getBaseSpriteVariant(id: number, variant: string): string {
+    return `${BASE_CDN}${id}${variant}.png`;
+  }
+
+  saveBaseSpriteVariantPref(id: number, variant: string): void {
+    localStorage.setItem(`sprite_pref_base_${id}`, variant);
+  }
+
   // ─── Sprite count & gallery URLs ──────────────────────────────────────────
   async getSpriteCount(headId: number, bodyId: number): Promise<number> {
     const base = `${BASE_CDN}${headId}.${bodyId}`;
@@ -54,6 +62,50 @@ export class ImageService {
       if (count >= 10) break;
     }
     return count;
+  }
+
+  async getSpriteCountForBase(id: number): Promise<number> {
+    const base = await this.checkUrl(this.getBaseSprite(id));
+    if (!base.ok) return 0;
+    let count = 1;
+    for (const char of VARIANTS) {
+      const r = await this.checkUrl(this.getBaseSpriteVariant(id, char));
+      if (!r.ok) break;
+      count++;
+      if (count >= 10) break;
+    }
+    return count;
+  }
+
+  async getAllSpriteUrlsForBase(
+    id: number,
+  ): Promise<{ url: string; label: string; variant: string; lastModified: number }[]> {
+    const base = await this.checkUrl(this.getBaseSprite(id));
+    if (!base.ok) return [];
+    const results: { url: string; label: string; variant: string; lastModified: number }[] = [
+      { url: this.getBaseSprite(id), label: 'Default', variant: '', lastModified: 0 },
+    ];
+    for (const char of VARIANTS) {
+      const url = this.getBaseSpriteVariant(id, char);
+      const r = await this.checkUrl(url);
+      if (!r.ok) break;
+      results.push({ url, label: char.toUpperCase(), variant: char, lastModified: 0 });
+      if (results.length >= 10) break;
+    }
+    return results;
+  }
+
+  async getLastSpriteUrl(headId: number, bodyId: number): Promise<string> {
+    const base = `${BASE_CDN}${headId}.${bodyId}`;
+    let lastUrl = `${base}.png`;
+    for (const char of VARIANTS) {
+      const url = `${base}${char}.png`;
+      const r = await this.checkUrl(url);
+      if (!r.ok) break;
+      lastUrl = url;
+      if (char === 'j') break; // safety cap at 10 variants
+    }
+    return lastUrl;
   }
 
   async getAllSpriteUrls(
@@ -78,30 +130,34 @@ export class ImageService {
     return results;
   }
 
-  /** Returns cached Last-Modified timestamp (ms) for a URL. Runs a HEAD if not cached. */
-  async getLastModified(url: string): Promise<number> {
-    const r = await this.checkUrl(url);
-    return r.lastModified;
+  /** Always returns 0 — Last-Modified is unavailable without fetch/HEAD (CORS-blocked). */
+  async getLastModified(_url: string): Promise<number> {
+    return 0;
   }
 
   // ─── Internal ─────────────────────────────────────────────────────────────
-  private async checkUrl(url: string): Promise<UrlCheck> {
+  // Uses Image loading instead of fetch/HEAD to avoid CORS restrictions.
+  // DigitalOcean Spaces blocks cross-origin HEAD requests but allows image loads.
+  private checkUrl(url: string): Promise<UrlCheck> {
     const cached = this.urlCache.get(url);
-    if (cached !== undefined) return cached;
+    if (cached !== undefined) return Promise.resolve(cached);
 
-    try {
-      const res = await fetch(url, { method: 'HEAD' });
-      const lm  = res.headers.get('Last-Modified');
-      const result: UrlCheck = {
-        ok: res.ok,
-        lastModified: lm ? new Date(lm).getTime() : 0,
+    return new Promise(resolve => {
+      const img = new Image();
+
+      img.onload = () => {
+        const result: UrlCheck = { ok: true, lastModified: 0 };
+        this.urlCache.set(url, result);
+        resolve(result);
       };
-      this.urlCache.set(url, result);
-      return result;
-    } catch {
-      const result: UrlCheck = { ok: false, lastModified: 0 };
-      this.urlCache.set(url, result);
-      return result;
-    }
+
+      img.onerror = () => {
+        const result: UrlCheck = { ok: false, lastModified: 0 };
+        this.urlCache.set(url, result);
+        resolve(result);
+      };
+
+      img.src = url;
+    });
   }
 }
