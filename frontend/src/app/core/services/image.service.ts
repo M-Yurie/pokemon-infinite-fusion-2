@@ -4,8 +4,13 @@ const BASE_CDN = 'https://ifd-spaces.sfo2.cdn.digitaloceanspaces.com/custom/';
 const SPRITE_PREF_KEY = (headId: number, bodyId: number) => `sprite_pref_${headId}_${bodyId}`;
 const VARIANTS = 'abcdefghijklmnopqrstuvwxyz';
 
+interface UrlCheck { ok: boolean; lastModified: number; }
+
 @Injectable({ providedIn: 'root' })
 export class ImageService {
+  // Unified HEAD-request cache — keyed by full URL
+  private readonly urlCache = new Map<string, UrlCheck>();
+
   // ─── URL builders ─────────────────────────────────────────────────────────
   getBaseSprite(id: number): string {
     return `${BASE_CDN}${id}.png`;
@@ -35,55 +40,68 @@ export class ImageService {
     return localStorage.getItem(SPRITE_PREF_KEY(headId, bodyId)) ?? '';
   }
 
-  // ─── Existence checks ─────────────────────────────────────────────────────
+  // ─── Sprite count & gallery URLs ──────────────────────────────────────────
   async getSpriteCount(headId: number, bodyId: number): Promise<number> {
     const base = `${BASE_CDN}${headId}.${bodyId}`;
-    if (!(await this.exists(`${base}.png`))) return 0;
+    const def = await this.checkUrl(`${base}.png`);
+    if (!def.ok) return 0;
 
     let count = 1;
     for (const char of VARIANTS) {
-      if (!(await this.exists(`${base}${char}.png`))) break;
+      const r = await this.checkUrl(`${base}${char}.png`);
+      if (!r.ok) break;
       count++;
       if (count >= 10) break;
     }
     return count;
   }
 
-  async getAllSpriteUrls(headId: number, bodyId: number): Promise<{ url: string; label: string; variant: string }[]> {
+  async getAllSpriteUrls(
+    headId: number,
+    bodyId: number,
+  ): Promise<{ url: string; label: string; variant: string; lastModified: number }[]> {
     const base = `${BASE_CDN}${headId}.${bodyId}`;
-    const defaultUrl = `${base}.png`;
-    if (!(await this.exists(defaultUrl))) return [];
+    const defaultCheck = await this.checkUrl(`${base}.png`);
+    if (!defaultCheck.ok) return [];
 
-    const results: { url: string; label: string; variant: string }[] = [
-      { url: defaultUrl, label: 'Default', variant: '' },
+    const results: { url: string; label: string; variant: string; lastModified: number }[] = [
+      { url: `${base}.png`, label: 'Default', variant: '', lastModified: defaultCheck.lastModified },
     ];
 
     for (const char of VARIANTS) {
       const url = `${base}${char}.png`;
-      if (!(await this.exists(url))) break;
-      results.push({ url, label: char.toUpperCase(), variant: char });
+      const r = await this.checkUrl(url);
+      if (!r.ok) break;
+      results.push({ url, label: char.toUpperCase(), variant: char, lastModified: r.lastModified });
     }
 
     return results;
   }
 
-  /** HEAD request to get Last-Modified date (for Age sort). Returns epoch on failure. */
-  async getLastModified(url: string): Promise<Date> {
-    try {
-      const res = await fetch(url, { method: 'HEAD' });
-      const lm = res.headers.get('Last-Modified');
-      return lm ? new Date(lm) : new Date(0);
-    } catch {
-      return new Date(0);
-    }
+  /** Returns cached Last-Modified timestamp (ms) for a URL. Runs a HEAD if not cached. */
+  async getLastModified(url: string): Promise<number> {
+    const r = await this.checkUrl(url);
+    return r.lastModified;
   }
 
-  private async exists(url: string): Promise<boolean> {
+  // ─── Internal ─────────────────────────────────────────────────────────────
+  private async checkUrl(url: string): Promise<UrlCheck> {
+    const cached = this.urlCache.get(url);
+    if (cached !== undefined) return cached;
+
     try {
       const res = await fetch(url, { method: 'HEAD' });
-      return res.ok;
+      const lm  = res.headers.get('Last-Modified');
+      const result: UrlCheck = {
+        ok: res.ok,
+        lastModified: lm ? new Date(lm).getTime() : 0,
+      };
+      this.urlCache.set(url, result);
+      return result;
     } catch {
-      return false;
+      const result: UrlCheck = { ok: false, lastModified: 0 };
+      this.urlCache.set(url, result);
+      return result;
     }
   }
 }

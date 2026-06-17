@@ -34,7 +34,12 @@
               [class.dex-modal__sprite-item--selected]="isSelectedVariant(galleryFusion()!.id, item.variant)"
               (click)="selectSpriteVariant(item.variant, $event)"
             >
-              <img class="dex-modal__sprite-img" [src]="item.url" [alt]="item.label" loading="lazy" />
+              <div class="dex-modal__sprite-wrap">
+                <img class="dex-modal__sprite-img" [src]="item.url" [alt]="item.label" loading="lazy" />
+                @if (item.lastModified) {
+                  <div class="dex-modal__sprite-date">Last updated: {{ formatDate(item.lastModified) }}</div>
+                }
+              </div>
               <span class="dex-modal__sprite-label">{{ item.label }}</span>
             </div>
           }
@@ -124,6 +129,23 @@
           </div>
         }
       </div>
+
+      <!-- Sort direction toggle -->
+      <button
+        class="dex-sort-dir"
+        (click)="toggleSortDir()"
+        [title]="filters().sortDir === 'asc' ? 'Ascending' : 'Descending'"
+      >
+        @if (filters().sortDir === 'asc') {
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/>
+          </svg>
+        } @else {
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/>
+          </svg>
+        }
+      </button>
 
       <!-- Filters toggle -->
       <button
@@ -298,9 +320,12 @@
                 [src]="getCardSpriteUrl(card)"
                 [alt]="card.name"
                 loading="lazy"
-                (error)="$any($event.target).style.display='none'; $any($event.target).nextElementSibling.style.display='flex'"
+                (load)="onCardImageLoaded(card)"
+                (error)="onSpriteError(card, $any($event.target))"
               />
-              <!-- Fallback placeholder (shown on 404) -->
+              <!-- Fusion fallback: generated sprite sheet (shown on 404) -->
+              <div class="dex-card__sprite-sheet" style="display:none; width:192px; height:192px; image-rendering:pixelated;"></div>
+              <!-- Base fallback: ? placeholder (shown on 404) -->
               <div class="dex-card__sprite-placeholder" style="display:none">
                 <span>?</span>
               </div>

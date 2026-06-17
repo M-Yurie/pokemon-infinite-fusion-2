@@ -25,6 +25,7 @@ export interface DexFilters {
   showOriginal: boolean;   // show base Pokémon cards
   showFusion: boolean;     // show fusion cards
   sortBy: SortOption;
+  sortDir: 'asc' | 'desc';
   favoriteIds: Set<string>;
   disabledIds: Set<number>;
 }

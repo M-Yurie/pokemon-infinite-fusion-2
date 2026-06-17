@@ -927,3 +927,50 @@
   from { opacity: 0; }
   to   { opacity: 1; }
 }
+
+// ─── Sort direction toggle ─────────────────────────────────────────────
+.dex-sort-dir {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-surface);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.6);
+  flex-shrink: 0;
+  transition: background $transition-normal, border-color $transition-normal, color $transition-normal;
+
+  &:hover {
+    background: rgba(124, 108, 255, 0.12);
+    border-color: rgba(124, 108, 255, 0.3);
+    color: #fff;
+  }
+}
+
+// ─── Gallery sprite date overlay ──────────────────────────────────────
+.dex-modal__sprite-wrap {
+  position: relative;
+
+  .dex-modal__sprite-date {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.6);
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 11px;
+    font-family: $font-family-base;
+    text-align: center;
+    padding: 4px;
+    opacity: 0;
+    transition: opacity 0.2s;
+    pointer-events: none;
+  }
+
+  &:hover .dex-modal__sprite-date {
+    opacity: 1;
+  }
+}

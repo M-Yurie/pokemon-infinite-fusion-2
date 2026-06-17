@@ -1,10 +1,24 @@
 import { Injectable } from '@angular/core';
 import { Pokemon } from '../../models/pokemon.model';
-import { DisplayCard, DexFilters, SortOption } from '../../models/fusion.model';
+import { DisplayCard, DexFilters, FusionPosition, SortOption } from '../../models/fusion.model';
 
 export type PoolItem =
   | { kind: 'base'; p: Pokemon }
   | { kind: 'fusion'; h: Pokemon; b: Pokemon };
+
+// Pokémon treated as pure Flying when contributing to a fusion type
+const NORMAL_FLYING_IDS = new Set([
+  16, 17, 18,           // Pidgey, Pidgeotto, Pidgeot
+  21, 22,               // Spearow, Fearow
+  41, 42,               // Zubat, Golbat
+  83,                   // Farfetch'd
+  84, 85,               // Doduo, Dodrio
+  163, 164,             // Hoothoot, Noctowl
+  198,                  // Murkrow
+  276, 277,             // Taillow, Swellow
+  278, 279,             // Wingull, Pelipper
+  333, 334,             // Swablu, Altaria
+]);
 
 @Injectable({ providedIn: 'root' })
 export class FusionService {
@@ -33,39 +47,60 @@ export class FusionService {
     };
   }
 
+  /**
+   * Builds the pool in interleaved order:
+   *   Group N (N = each body pokémon by id):
+   *     1. base(N)
+   *     2. fusion(1.N), fusion(2.N), ... fusion(524.N)
+   */
   buildPool(allPokemon: Pokemon[], filters: DexFilters): PoolItem[] {
     const {
       selectedPokemon, position, types, mono, ability,
       showLegendaries, showFavorites, showOriginal, showFusion,
-      favoriteIds, disabledIds,
+      favoriteIds, disabledIds, sortBy, sortDir,
     } = filters;
 
-    const enabled = allPokemon.filter(p => !disabledIds.has(p.id));
+    // Ensure stable id-ascending order
+    const enabled = allPokemon
+      .filter(p => !disabledIds.has(p.id))
+      .sort((a, b) => a.id - b.id);
+
     const items: PoolItem[] = [];
 
-    // ─── 1. Base Pokémon ─────────────────────────────────────────────────
-    if (showOriginal) {
-      for (const p of enabled) {
-        // selectedPokemon filter: if any selected, only show those bases
-        if (selectedPokemon.length > 0 && !selectedPokemon.some(s => s.id === p.id)) continue;
-        if (!this.passesBaseFilters(p, { showLegendaries, types, mono, ability, showFavorites, favoriteIds })) continue;
-        items.push({ kind: 'base', p });
+    // Outer loop: body pokémon (= group N)
+    for (const bodyPok of enabled) {
+      // 1. Base card for this group
+      if (showOriginal) {
+        const passesSelection =
+          selectedPokemon.length === 0 ||
+          selectedPokemon.some(s => s.id === bodyPok.id);
+        if (
+          passesSelection &&
+          this.passesBaseFilters(bodyPok, { showLegendaries, types, mono, ability, showFavorites, favoriteIds })
+        ) {
+          items.push({ kind: 'base', p: bodyPok });
+        }
+      }
+
+      // 2. All fusions where body = bodyPok, ordered by headId
+      if (showFusion) {
+        for (const headPok of enabled) {
+          if (!this.passesFusionSelection(headPok, bodyPok, selectedPokemon, position)) continue;
+          if (!this.passesFusionFilters(headPok, bodyPok, { showLegendaries, types, mono, ability, showFavorites, favoriteIds })) continue;
+          items.push({ kind: 'fusion', h: headPok, b: bodyPok });
+        }
       }
     }
 
-    // ─── 2. Fusion Pokémon ───────────────────────────────────────────────
-    if (showFusion) {
-      const fusionPairs = this.buildFusionPairs(enabled, selectedPokemon, position);
-      for (const { h, b } of fusionPairs) {
-        if (!this.passesFusionFilters(h, b, { showLegendaries, types, mono, ability, showFavorites, favoriteIds })) continue;
-        items.push({ kind: 'fusion', h, b });
-      }
-    }
-
-    // ─── Sort ────────────────────────────────────────────────────────────
-    // Age sort: pool stays in dex order; per-page async sort is done in dex.ts
-    if (filters.sortBy !== 'dex' && filters.sortBy !== 'age') {
-      items.sort((x, y) => this.compareItems(x, y, filters.sortBy));
+    // Apply stat sorts (dex# IS the natural interleaved order; age handled per-batch in component)
+    if (sortBy !== 'dex' && sortBy !== 'age') {
+      items.sort((x, y) => {
+        const av = this.itemStatValue(x, sortBy);
+        const bv = this.itemStatValue(y, sortBy);
+        return sortDir === 'asc' ? av - bv : bv - av;
+      });
+    } else if (sortBy === 'dex' && sortDir === 'desc') {
+      items.reverse();
     }
 
     return items;
@@ -75,40 +110,31 @@ export class FusionService {
     return pool.slice(offset, offset + limit).map(item => this.makeDisplayCard(item));
   }
 
-  // ─── Private helpers ────────────────────────────────────────────────────
-  private buildFusionPairs(
-    enabled: Pokemon[],
+  // ─── Private helpers ──────────────────────────────────────────────────────
+  private passesFusionSelection(
+    head: Pokemon,
+    body: Pokemon,
     selectedPokemon: Pokemon[],
-    position: DexFilters['position'],
-  ): { h: Pokemon; b: Pokemon }[] {
-    if (selectedPokemon.length === 2) {
-      const [a, b] = selectedPokemon;
-      if (position === 'either') return [{ h: a, b }, { h: b, b: a }];
-      if (position === 'head')   return [{ h: a, b }];
-      return [{ h: b, b: a }];
-    }
+    position: FusionPosition,
+  ): boolean {
+    if (selectedPokemon.length === 0) return true;
 
     if (selectedPokemon.length === 1) {
       const sel = selectedPokemon[0];
-      const others = enabled.filter(p => p.id !== sel.id);
-      if (position === 'either') {
-        return [
-          ...others.map(p => ({ h: sel, b: p })),
-          ...others.map(p => ({ h: p,   b: sel })),
-        ];
-      }
-      if (position === 'head') return others.map(p => ({ h: sel, b: p }));
-      return others.map(p => ({ h: p, b: sel }));
+      if (position === 'head') return head.id === sel.id;
+      if (position === 'body') return body.id === sel.id;
+      return head.id === sel.id || body.id === sel.id;
     }
 
-    // No selection: full grid including self-fusions
-    const pairs: { h: Pokemon; b: Pokemon }[] = [];
-    for (const h of enabled) {
-      for (const b of enabled) {
-        pairs.push({ h, b });
-      }
-    }
-    return pairs;
+    const selA = selectedPokemon[0];
+    const selB = selectedPokemon[1];
+    if (position === 'head')  return head.id === selA.id && body.id === selB.id;
+    if (position === 'body')  return head.id === selB.id && body.id === selA.id;
+    // either
+    return (
+      (head.id === selA.id && body.id === selB.id) ||
+      (head.id === selB.id && body.id === selA.id)
+    );
   }
 
   private passesBaseFilters(
@@ -159,31 +185,26 @@ export class FusionService {
     return true;
   }
 
-  private fusionTypes(h: Pokemon, b: Pokemon): string[] {
-    const type1 = h.types[0];
-    let type2 = b.types[1] ?? b.types[0];
-    if (type2 === type1) type2 = b.types[0];
-    return type1 !== type2 ? [type1, type2] : [type1];
+  private getEffectiveTypes(pokemon: Pokemon): string[] {
+    return NORMAL_FLYING_IDS.has(pokemon.id) ? ['Flying'] : pokemon.types;
   }
 
-  private compareItems(x: PoolItem, y: PoolItem, sortBy: SortOption): number {
-    const av = this.itemStatValue(x, sortBy);
-    const bv = this.itemStatValue(y, sortBy);
-    return bv - av; // descending
+  private fusionTypes(h: Pokemon, b: Pokemon): string[] {
+    const hTypes = this.getEffectiveTypes(h);
+    const bTypes = this.getEffectiveTypes(b);
+    const type1 = hTypes[0];
+    let type2   = bTypes[1] ?? bTypes[0];
+    if (type2 === type1) type2 = bTypes[0];
+    return type1 !== type2 ? [type1, type2] : [type1];
   }
 
   private itemStatValue(item: PoolItem, stat: SortOption): number {
     if (item.kind === 'base') {
       const s = item.p.stats;
       switch (stat) {
-        case 'hp':    return s.hp;
-        case 'atk':   return s.atk;
-        case 'def':   return s.def;
-        case 'spa':   return s.spa;
-        case 'spd':   return s.spd;
-        case 'spe':   return s.spe;
-        case 'total': return s.total;
-        default:      return 0;
+        case 'hp': return s.hp; case 'atk': return s.atk; case 'def': return s.def;
+        case 'spa': return s.spa; case 'spd': return s.spd; case 'spe': return s.spe;
+        case 'total': return s.total; default: return 0;
       }
     }
     return this.fusionStatValue(item.h, item.b, stat);

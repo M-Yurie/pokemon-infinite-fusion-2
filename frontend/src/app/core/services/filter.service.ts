@@ -13,6 +13,7 @@ const DEFAULT_FILTERS: DexFilters = {
   showOriginal: true,
   showFusion: true,
   sortBy: 'dex',
+  sortDir: 'asc' as const,
   favoriteIds: new Set<string>(),
   disabledIds: new Set<number>(),
 };
@@ -78,7 +79,12 @@ export class FilterService {
   }
 
   setSortBy(sortBy: SortOption): void {
-    this.filters.update(f => ({ ...f, sortBy }));
+    const sortDir: 'asc' | 'desc' = sortBy === 'dex' ? 'asc' : 'desc';
+    this.filters.update(f => ({ ...f, sortBy, sortDir }));
+  }
+
+  setSortDir(sortDir: 'asc' | 'desc'): void {
+    this.filters.update(f => ({ ...f, sortDir }));
   }
 
   setFavoriteIds(ids: Set<string>): void {

@@ -42,7 +42,7 @@ export class Dex implements AfterViewInit, OnDestroy {
   readonly spriteCounts   = signal<Map<string, number>>(new Map());
   readonly spritePrefs    = signal<Map<string, string>>(new Map());
   readonly galleryFusion  = signal<DisplayCard | null>(null);
-  readonly galleryItems   = signal<{ url: string; label: string; variant: string }[]>([]);
+  readonly galleryItems   = signal<{ url: string; label: string; variant: string; lastModified: number }[]>([]);
   readonly searchOpen     = signal(false);
   readonly searchQuery    = signal('');
   readonly searchResults  = signal<Pokemon[]>([]);
@@ -60,7 +60,7 @@ export class Dex implements AfterViewInit, OnDestroy {
   private observer: IntersectionObserver | null = null;
   private rebuildTimer: ReturnType<typeof setTimeout> | null = null;
   private isLoadingPage = false;
-  private lastModifiedCache = new Map<string, Date>();
+  private lastModifiedCache = new Map<string, number>(); // card.id → ms timestamp
   private allAbilityNames: string[] = [];
 
   // ─── Static data ──────────────────────────────────────────────────────────
@@ -132,6 +132,7 @@ export class Dex implements AfterViewInit, OnDestroy {
         favorites: filters.showFavorites,
         favIds:    filters.showFavorites ? [...favIds].sort() : [],
         sortBy:    filters.sortBy,
+        sortDir:   filters.sortDir,
       });
 
       if (key !== this.poolKey) {
@@ -161,7 +162,6 @@ export class Dex implements AfterViewInit, OnDestroy {
         }
       }, { rootMargin: '0px 0px 576px 0px' });
 
-      // Sentinel is always in DOM (outside @if), so this succeeds
       if (this.sentinelRef?.nativeElement) {
         this.observer.observe(this.sentinelRef.nativeElement);
       }
@@ -180,13 +180,12 @@ export class Dex implements AfterViewInit, OnDestroy {
       const first = this.fusionSvc.getPage(this.pool, 0, 36);
 
       if (filters.sortBy === 'age') {
-        void this.sortByAgeAndSet(first, true).then(() => {
+        void this.sortByAgeAndSet(first, true, filters.sortDir).then(() => {
           this.poolOffset = 36;
           this.hasMore.set(this.pool.length > 36);
           this.loadingMore.set(false);
           this.isLoadingPage = false;
           this.spriteCounts.set(new Map());
-          this.loadSpriteCounts(this.displayedCards());
         });
       } else {
         this.displayedCards.set(first);
@@ -195,7 +194,6 @@ export class Dex implements AfterViewInit, OnDestroy {
         this.loadingMore.set(false);
         this.isLoadingPage = false;
         this.spriteCounts.set(new Map());
-        this.loadSpriteCounts(first);
       }
     }, 0);
   }
@@ -203,44 +201,46 @@ export class Dex implements AfterViewInit, OnDestroy {
   private loadNextPage(): void {
     if (this.isLoadingPage || this.poolOffset >= this.pool.length || !this.hasMore()) return;
 
-    const sortBy = this.filterSvc.filters().sortBy;
-    const slice  = this.fusionSvc.getPage(this.pool, this.poolOffset, 36);
-    const taken  = Math.min(36, this.pool.length - this.poolOffset);
+    const sortDir = this.filterSvc.filters().sortDir;
+    const sortBy  = this.filterSvc.filters().sortBy;
+    const slice   = this.fusionSvc.getPage(this.pool, this.poolOffset, 36);
+    const taken   = Math.min(36, this.pool.length - this.poolOffset);
     this.poolOffset += taken;
     if (this.poolOffset >= this.pool.length) this.hasMore.set(false);
 
     if (sortBy === 'age') {
       this.isLoadingPage = true;
-      void this.sortByAgeAndSet(slice, false).then(() => { this.isLoadingPage = false; });
+      void this.sortByAgeAndSet(slice, false, sortDir).then(() => { this.isLoadingPage = false; });
     } else {
       this.displayedCards.update(prev => [...prev, ...slice]);
-      this.loadSpriteCounts(slice);
     }
   }
 
-  private async sortByAgeAndSet(cards: DisplayCard[], reset: boolean): Promise<void> {
-    const withDates = await Promise.all(cards.map(async card => {
-      const key = card.id;
-      if (this.lastModifiedCache.has(key)) {
-        return { card, date: this.lastModifiedCache.get(key)! };
+  private async sortByAgeAndSet(cards: DisplayCard[], reset: boolean, sortDir: 'asc' | 'desc'): Promise<void> {
+    const withTs = await Promise.all(cards.map(async card => {
+      if (this.lastModifiedCache.has(card.id)) {
+        return { card, ts: this.lastModifiedCache.get(card.id)! };
       }
       const url = card.isFusion && card.body
         ? this.imageSvc.getFusionSprite(card.head.id, card.body.id)
         : this.imageSvc.getBaseSprite(card.head.id);
-      const date = await this.imageSvc.getLastModified(url);
-      this.lastModifiedCache.set(key, date);
-      return { card, date };
+      const ts = await this.imageSvc.getLastModified(url);
+      this.lastModifiedCache.set(card.id, ts);
+      return { card, ts };
     }));
 
-    withDates.sort((a, b) => b.date.getTime() - a.date.getTime());
-    const sorted = withDates.map(x => x.card);
+    if (sortDir === 'asc') {
+      withTs.sort((a, b) => a.ts - b.ts); // oldest first
+    } else {
+      withTs.sort((a, b) => b.ts - a.ts); // newest first
+    }
+    const sorted = withTs.map(x => x.card);
 
     if (reset) {
       this.displayedCards.set(sorted);
     } else {
       this.displayedCards.update(prev => [...prev, ...sorted]);
     }
-    this.loadSpriteCounts(sorted);
   }
 
   private buildAbilityList(pokemon: Pokemon[]): void {
@@ -250,21 +250,6 @@ export class Dex implements AfterViewInit, OnDestroy {
       if (p.hiddenAbility) names.add(p.hiddenAbility.name);
     }
     this.allAbilityNames = [...names].sort();
-  }
-
-  private loadSpriteCounts(cards: DisplayCard[]): void {
-    for (const card of cards) {
-      if (!card.isFusion || !card.body) continue;
-      this.imageSvc.getSpriteCount(card.head.id, card.body.id).then(count => {
-        if (count > 1) {
-          this.spriteCounts.update(m => {
-            const next = new Map(m);
-            next.set(card.id, count);
-            return next;
-          });
-        }
-      });
-    }
   }
 
   // ─── Search ───────────────────────────────────────────────────────────────
@@ -299,6 +284,11 @@ export class Dex implements AfterViewInit, OnDestroy {
   setSortBy(s: SortOption): void {
     this.filterSvc.setSortBy(s);
     this.sortOpen.set(false);
+  }
+
+  toggleSortDir(): void {
+    const curr = this.filterSvc.filters().sortDir;
+    this.filterSvc.setSortDir(curr === 'asc' ? 'desc' : 'asc');
   }
 
   toggleType(type: string): void { this.filterSvc.toggleType(type); }
@@ -373,7 +363,6 @@ export class Dex implements AfterViewInit, OnDestroy {
     this.galleryFusion.set(card);
     this.galleryItems.set([]);
 
-    // Load current pref into spritePrefs so it highlights correctly
     const pref = this.imageSvc.getSpritePref(card.head.id, card.body!.id);
     this.spritePrefs.update(m => {
       const next = new Map(m);
@@ -411,11 +400,62 @@ export class Dex implements AfterViewInit, OnDestroy {
       : this.imageSvc.getFusionSprite(card.head.id, card.body.id);
   }
 
-  spriteCount(cardId: string): number   { return this.spriteCounts().get(cardId) ?? 0; }
+  onCardImageLoaded(card: DisplayCard): void {
+    if (!card.isFusion || !card.body) return;
+    this.imageSvc.getSpriteCount(card.head.id, card.body.id).then(count => {
+      if (count > 1) {
+        this.spriteCounts.update(m => {
+          const next = new Map(m);
+          next.set(card.id, count);
+          return next;
+        });
+      }
+    });
+  }
+
+  onSpriteError(card: DisplayCard, imgEl: HTMLImageElement): void {
+    imgEl.style.display = 'none';
+    const parent = imgEl.parentElement;
+    if (!parent) return;
+
+    if (card.isFusion && card.body) {
+      const bodyId = card.body.id;
+      const col = bodyId % 10 === 0 ? 10 : bodyId % 10;
+      const row = Math.ceil(bodyId / 10);
+      const x = (col - 1) * 192;
+      const y = (row - 1) * 192;
+      const sheetEl = parent.querySelector('.dex-card__sprite-sheet') as HTMLElement | null;
+      if (sheetEl) {
+        sheetEl.style.display = 'block';
+        sheetEl.style.backgroundImage = `url('/assets/sprites/generated/${card.head.id}.png')`;
+        sheetEl.style.backgroundPosition = `-${x}px -${y}px`;
+        sheetEl.style.backgroundSize = '1920px 1920px';
+      }
+      this.imageSvc.getSpriteCount(card.head.id, card.body.id).then(count => {
+        if (count > 1) {
+          this.spriteCounts.update(m => {
+            const next = new Map(m);
+            next.set(card.id, count);
+            return next;
+          });
+        }
+      });
+    } else {
+      const placeholder = parent.querySelector('.dex-card__sprite-placeholder') as HTMLElement | null;
+      if (placeholder) placeholder.style.display = 'flex';
+    }
+  }
+
+  spriteCount(cardId: string): number    { return this.spriteCounts().get(cardId) ?? 0; }
   spriteCountLabel(count: number): string { return count >= 10 ? '+' : String(count); }
 
   isSelectedVariant(cardId: string, variant: string): boolean {
     return (this.spritePrefs().get(cardId) ?? '') === variant;
+  }
+
+  formatDate(ts: number): string {
+    if (!ts) return '';
+    return new Date(ts).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
   }
 
   typeColor(type: string): string    { return TYPE_COLORS[type] ?? '#9FA19F'; }
