@@ -1,0 +1,221 @@
+@use 'variables' as *;
+@use 'mixins' as mix;
+@use 'sass:color';
+
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 200;
+  background-color: transparent;
+  border-bottom: 1px solid transparent;
+  transition:
+    background-color 0.35s ease,
+    border-color 0.35s ease;
+
+  &--scrolled {
+    background-color: rgba(15, 17, 23, 0.88);
+    border-bottom-color: var(--color-border);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+
+  // Non-home pages always show solid bg regardless of scroll position
+  &--solid {
+    background-color: rgba(15, 17, 23, 0.95);
+    border-bottom-color: var(--color-border);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
+
+  // ─── 3-column grid: logo | links | actions ────────────────────────────────
+  &__inner {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: $spacing-lg;
+    max-width: $max-width-content;
+    margin: 0 auto;
+    padding: 0 $spacing-lg;
+    height: $navbar-height;
+  }
+
+  // ─── Logo ─────────────────────────────────────────────────────────────────
+  &__logo {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    justify-self: start;
+  }
+
+  &__logo-img {
+    height: 64px;
+    width: auto;
+    object-fit: contain;
+  }
+
+  // ─── Centered links ────────────────────────────────────────────────────────
+  &__links {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+
+    a {
+      position: relative;
+      color: rgba(241, 245, 249, 0.7);
+      font-size: 0.875rem;
+      font-weight: $font-weight-medium;
+      letter-spacing: 0.01em;
+      transition: color $transition-normal;
+      white-space: nowrap;
+
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: -6px;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: var(--color-accent);
+        border-radius: $radius-full;
+        transition: width $transition-normal;
+      }
+
+      &:hover {
+        color: var(--color-text);
+      }
+
+      &.active {
+        color: var(--color-text);
+
+        &::after {
+          width: 100%;
+        }
+      }
+    }
+  }
+
+  // ─── Right actions: CTA button + burger ────────────────────────────────────
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: $spacing-md;
+    justify-self: end;
+  }
+
+  &__cta-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: $spacing-xs;
+    padding: 0.5rem 1.125rem;
+    background: var(--color-primary);
+    color: #fff;
+    font-size: 0.8125rem;
+    font-weight: $font-weight-semibold;
+    border-radius: $radius-full;
+    white-space: nowrap;
+    transition:
+      background-color $transition-normal,
+      box-shadow $transition-normal,
+      transform $transition-fast;
+
+    &:hover {
+      background: color.adjust(#7C6CFF, $lightness: 6%);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(124, 108, 255, 0.4);
+    }
+  }
+
+  // ─── Mobile burger ─────────────────────────────────────────────────────────
+  &__burger {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    padding: $spacing-xs;
+    background: none;
+    border: none;
+    cursor: pointer;
+
+    span {
+      display: block;
+      width: 20px;
+      height: 2px;
+      background-color: var(--color-text);
+      border-radius: $radius-full;
+      transform-origin: center;
+      transition: transform $transition-normal, opacity $transition-normal;
+    }
+
+    &--open {
+      span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+      span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+      span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+    }
+  }
+}
+
+// ─── Mobile overrides ─────────────────────────────────────────────────────────
+@media (max-width: #{$bp-md}) {
+  .navbar {
+    background-color: rgba(15, 17, 23, 0.96);
+    border-bottom-color: var(--color-border);
+
+    &__inner {
+      grid-template-columns: auto 1fr auto;
+    }
+
+    &__links {
+      position: fixed;
+      top: $navbar-height;
+      left: 0;
+      right: 0;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: flex-start;
+      gap: 0;
+      padding: $spacing-md $spacing-lg $spacing-lg;
+      background-color: rgba(15, 17, 23, 0.98);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--color-border);
+      transform: translateY(-110%);
+      opacity: 0;
+      pointer-events: none;
+      transition:
+        transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+        opacity 0.3s ease;
+
+      &--open {
+        transform: translateY(0);
+        opacity: 1;
+        pointer-events: all;
+      }
+
+      li {
+        width: 100%;
+        border-bottom: 1px solid var(--color-border);
+        &:last-child { border-bottom: none; }
+      }
+
+      a {
+        display: block;
+        padding: 0.875rem 0;
+        font-size: $font-size-base;
+
+        &::after { display: none; }
+      }
+    }
+
+    &__cta-btn {
+      display: none;
+    }
+
+    &__burger {
+      display: flex;
+    }
+  }
+}

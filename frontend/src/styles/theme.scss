@@ -1,0 +1,33 @@
+:root {
+  // ─── Background ────────────────────────────────────────────────────────────
+  --color-bg:          #0F1117;
+  --color-surface:     #1D2230;
+  --color-surface-2:   #252840;
+
+  // ─── Brand / Accent ────────────────────────────────────────────────────────
+  --color-primary:     #7C6CFF;
+  --color-secondary:   #7c3aed;
+  --color-accent:      #79DFFF;
+  --color-accent-2:    #FF8BCF;
+
+  // ─── Text ──────────────────────────────────────────────────────────────────
+  --color-text:        #ffffff;
+  --color-text-muted:  rgba(255, 255, 255, 0.45);
+  --color-text-subtle: rgba(255, 255, 255, 0.25);
+  --color-text-dim:    rgba(255, 255, 255, 0.55);
+
+  // ─── Border ────────────────────────────────────────────────────────────────
+  --color-border: rgba(255, 255, 255, 0.06);
+
+  // ─── Semantic ──────────────────────────────────────────────────────────────
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-danger:  #ef4444;
+
+  // ─── Composites ────────────────────────────────────────────────────────────
+  --gradient-heading: linear-gradient(135deg, #fff 30%, #79DFFF 65%, #7C6CFF);
+  --gradient-cta:     linear-gradient(135deg, #fff 20%, #79DFFF 60%, #7C6CFF);
+  --gradient-button:  linear-gradient(135deg, #7C6CFF, #79DFFF);
+  --shadow-button:    0 0 30px rgba(124, 108, 255, 0.45), 0 4px 20px rgba(0, 0, 0, 0.4);
+  --shadow-button-hover: 0 0 50px rgba(124, 108, 255, 0.65), 0 8px 32px rgba(0, 0, 0, 0.5);
+}

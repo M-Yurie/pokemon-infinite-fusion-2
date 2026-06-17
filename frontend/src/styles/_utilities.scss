@@ -1,0 +1,58 @@
+@use 'variables' as *;
+
+// ─── Display ───────────────────────────────────────────────────────────────
+.d-none    { display: none; }
+.d-flex    { display: flex; }
+.d-grid    { display: grid; }
+.d-block   { display: block; }
+.d-inline  { display: inline; }
+
+// ─── Flex helpers ──────────────────────────────────────────────────────────
+.flex-col     { flex-direction: column; }
+.flex-wrap    { flex-wrap: wrap; }
+.items-center { align-items: center; }
+.items-start  { align-items: flex-start; }
+.items-end    { align-items: flex-end; }
+.justify-center  { justify-content: center; }
+.justify-between { justify-content: space-between; }
+.justify-end     { justify-content: flex-end; }
+.gap-sm  { gap: $spacing-sm; }
+.gap-md  { gap: $spacing-md; }
+.gap-lg  { gap: $spacing-lg; }
+
+// ─── Spacing ───────────────────────────────────────────────────────────────
+.p-sm  { padding: $spacing-sm; }
+.p-md  { padding: $spacing-md; }
+.p-lg  { padding: $spacing-lg; }
+.px-md { padding-inline: $spacing-md; }
+.py-md { padding-block: $spacing-md; }
+.mt-sm { margin-top: $spacing-sm; }
+.mt-md { margin-top: $spacing-md; }
+.mt-lg { margin-top: $spacing-lg; }
+.mb-md { margin-bottom: $spacing-md; }
+.mb-lg { margin-bottom: $spacing-lg; }
+
+// ─── Text ──────────────────────────────────────────────────────────────────
+.text-center { text-align: center; }
+.text-right  { text-align: right; }
+.text-sm     { font-size: $font-size-sm; }
+.text-md     { font-size: $font-size-md; }
+.text-lg     { font-size: $font-size-lg; }
+.font-bold   { font-weight: $font-weight-bold; }
+.font-medium { font-weight: $font-weight-medium; }
+.capitalize  { text-transform: capitalize; }
+.uppercase   { text-transform: uppercase; }
+
+// ─── Colors ────────────────────────────────────────────────────────────────
+.text-primary { color: var(--color-primary); }
+.text-muted   { color: var(--color-text-muted); }
+.text-danger  { color: var(--color-danger); }
+.text-success { color: var(--color-success); }
+
+// ─── Misc ──────────────────────────────────────────────────────────────────
+.w-full      { width: 100%; }
+.h-full      { height: 100%; }
+.rounded     { border-radius: $radius-md; }
+.rounded-lg  { border-radius: $radius-lg; }
+.overflow-hidden { overflow: hidden; }
+.cursor-pointer  { cursor: pointer; }

@@ -1,0 +1,72 @@
+@use 'variables' as *;
+
+// ─── Responsive ────────────────────────────────────────────────────────────
+@mixin respond-to($bp) {
+  @if $bp == sm  { @media (min-width: #{$bp-sm})  { @content; } }
+  @else if $bp == md  { @media (min-width: #{$bp-md})  { @content; } }
+  @else if $bp == lg  { @media (min-width: #{$bp-lg})  { @content; } }
+  @else if $bp == xl  { @media (min-width: #{$bp-xl})  { @content; } }
+  @else if $bp == 2xl { @media (min-width: #{$bp-2xl}) { @content; } }
+}
+
+// ─── Layout helpers ────────────────────────────────────────────────────────
+@mixin container {
+  width: 100%;
+  max-width: $max-width-content;
+  margin-inline: auto;
+  padding-inline: $spacing-lg;
+}
+
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+// ─── Truncate ──────────────────────────────────────────────────────────────
+@mixin truncate {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+// ─── Visually hidden ───────────────────────────────────────────────────────
+@mixin visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+// ─── Focus ring ────────────────────────────────────────────────────────────
+@mixin focus-ring {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+// ─── Scrollbar ─────────────────────────────────────────────────────────────
+@mixin custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: var(--color-border);
+    border-radius: $radius-full;
+  }
+}

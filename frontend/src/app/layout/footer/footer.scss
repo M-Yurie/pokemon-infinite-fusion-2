@@ -1,0 +1,132 @@
+@use 'variables' as *;
+@use 'mixins' as mix;
+
+.footer {
+  background-color: var(--color-bg);
+  border-top: 1px solid var(--color-border);
+
+  // ─── Top section ────────────────────────────────────────────────────────────
+  &__top {
+    padding: 3.5rem $spacing-lg;
+  }
+
+  &__inner {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 3rem;
+    max-width: $max-width-content;
+    margin: 0 auto;
+
+    @include mix.respond-to(md) {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+  }
+
+  // ─── Brand column ───────────────────────────────────────────────────────────
+  &__brand {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-md;
+  }
+
+  &__logo {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  &__logo-img {
+    height: 36px;
+    width: auto;
+    object-fit: contain;
+    mix-blend-mode: screen;
+    opacity: 0.85;
+  }
+
+  &__tagline {
+    font-size: $font-size-sm;
+    color: var(--color-text-muted);
+    line-height: $line-height-loose;
+    max-width: 34ch;
+    margin: 0;
+  }
+
+  // ─── Nav group columns ───────────────────────────────────────────────────────
+  &__nav-group {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-md;
+  }
+
+  &__nav-title {
+    font-size: $font-size-xs;
+    font-weight: $font-weight-bold;
+    color: var(--color-text);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin: 0;
+  }
+
+  &__nav-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+  }
+
+  &__nav-link {
+    font-size: $font-size-sm;
+    color: var(--color-text-muted);
+    transition: color $transition-normal;
+
+    &:hover {
+      color: var(--color-accent);
+    }
+  }
+
+  // ─── Bottom copyright bar ────────────────────────────────────────────────────
+  &__bottom {
+    border-top: 1px solid var(--color-border);
+    padding: 1.25rem $spacing-lg;
+  }
+
+  &__bottom-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: $spacing-md;
+    max-width: $max-width-content;
+    margin: 0 auto;
+
+    @include mix.respond-to(md) {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: $spacing-sm;
+    }
+  }
+
+  &__copy {
+    font-size: $font-size-xs;
+    color: var(--color-text-muted);
+    line-height: $line-height-normal;
+    margin: 0;
+  }
+
+  &__legal {
+    display: flex;
+    gap: 1.25rem;
+    flex-shrink: 0;
+  }
+
+  &__legal-link {
+    font-size: $font-size-xs;
+    color: var(--color-text-muted);
+    transition: color $transition-normal;
+
+    &:hover {
+      color: var(--color-text);
+    }
+  }
+}

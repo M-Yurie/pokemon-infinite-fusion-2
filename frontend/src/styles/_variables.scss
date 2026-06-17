@@ -1,0 +1,54 @@
+// ─── Spacing ───────────────────────────────────────────────────────────────
+$spacing-xs:  0.25rem;
+$spacing-sm:  0.5rem;
+$spacing-md:  1rem;
+$spacing-lg:  1.5rem;
+$spacing-xl:  2rem;
+$spacing-2xl: 3rem;
+$spacing-3xl: 4rem;
+
+// ─── Typography ────────────────────────────────────────────────────────────
+$font-family-base: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+$font-family-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+$font-size-xs:   0.75rem;
+$font-size-sm:   0.875rem;
+$font-size-base: 1rem;
+$font-size-md:   1.125rem;
+$font-size-lg:   1.25rem;
+$font-size-xl:   1.5rem;
+$font-size-2xl:  2rem;
+$font-size-3xl:  3rem;
+
+$font-weight-normal:   400;
+$font-weight-medium:   500;
+$font-weight-semibold: 600;
+$font-weight-bold:     700;
+
+$line-height-tight:  1.2;
+$line-height-normal: 1.5;
+$line-height-loose:  1.75;
+
+// ─── Border radius ─────────────────────────────────────────────────────────
+$radius-sm:   0.25rem;
+$radius-md:   0.375rem;
+$radius-lg:   0.5rem;
+$radius-xl:   0.75rem;
+$radius-2xl:  1rem;
+$radius-full: 999px;
+
+// ─── Breakpoints ───────────────────────────────────────────────────────────
+$bp-sm:  480px;
+$bp-md:  768px;
+$bp-lg:  1024px;
+$bp-xl:  1280px;
+$bp-2xl: 1536px;
+
+// ─── Transitions ───────────────────────────────────────────────────────────
+$transition-fast:   0.15s ease;
+$transition-normal: 0.2s ease;
+$transition-slow:   0.3s ease;
+
+// ─── Layout ────────────────────────────────────────────────────────────────
+$max-width-content: 1280px;
+$navbar-height:     4rem;

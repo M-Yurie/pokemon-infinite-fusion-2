@@ -1,0 +1,55 @@
+<nav class="navbar" [class.navbar--scrolled]="isScrolled()" [class.navbar--solid]="!isHomePage()">
+  <div class="navbar__inner">
+
+    <!-- Left: Logo -->
+    <a class="navbar__logo" routerLink="/" (click)="closeMenu()">
+      <img
+        src="/assets/icons/Game_Logo_Hoenn.webp"
+        alt="Pokémon Infinite Fusion: Hoenn"
+        class="navbar__logo-img"
+      />
+    </a>
+
+    <!-- Center: Navigation links -->
+    <ul class="navbar__links" [class.navbar__links--open]="isMenuOpen()">
+      <li>
+        <a
+          routerLink="/"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          (click)="closeMenu()"
+        >Home</a>
+      </li>
+      <li><a routerLink="/download" routerLinkActive="active" (click)="closeMenu()">Download</a></li>
+      <li><a routerLink="/dex" routerLinkActive="active" (click)="closeMenu()">Dex</a></li>
+      <li><a routerLink="/faq" routerLinkActive="active" (click)="closeMenu()">FAQ</a></li>
+      <li><a href="https://discord.gg/tmDkVGVXRA" target="_blank" rel="noreferrer" (click)="closeMenu()">Discord</a></li>
+    </ul>
+
+    <!-- Right: Download CTA -->
+    <div class="navbar__actions">
+      <a routerLink="/download" class="navbar__cta-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        Download Demo
+      </a>
+
+      <!-- Mobile burger -->
+      <button
+        class="navbar__burger"
+        [class.navbar__burger--open]="isMenuOpen()"
+        (click)="toggleMenu()"
+        [attr.aria-expanded]="isMenuOpen()"
+        aria-label="Toggle navigation"
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+
+  </div>
+</nav>

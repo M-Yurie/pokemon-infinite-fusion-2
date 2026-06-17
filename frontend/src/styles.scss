@@ -1,0 +1,15 @@
+// ─── Theme (CSS custom properties) ─────────────────────────────────────────
+@use 'styles/theme';
+
+// ─── Foundation ────────────────────────────────────────────────────────────
+@use 'styles/reset';
+@use 'styles/typography';
+
+// ─── Utilities ─────────────────────────────────────────────────────────────
+@use 'styles/utilities';
+
+// ─── Base body ─────────────────────────────────────────────────────────────
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+}

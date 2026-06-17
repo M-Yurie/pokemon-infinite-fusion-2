@@ -1,0 +1,660 @@
+@use 'variables' as *;
+@use 'mixins' as mix;
+
+// ─── Scroll animation system ──────────────────────────────────────────────────
+.anim {
+  opacity: 0;
+  transform: translateY(28px);
+  transition:
+    opacity 0.65s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.65s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  &--zoom {
+    transform: scale(0.94) translateY(16px);
+    &.is-visible { transform: scale(1) translateY(0); }
+  }
+
+  &--delay-0 { transition-delay: 0s; }
+  &--delay-1 { transition-delay: 0.1s; }
+  &--delay-2 { transition-delay: 0.2s; }
+  &--delay-3 { transition-delay: 0.32s; }
+}
+
+// ─── Shared section chrome ────────────────────────────────────────────────────
+.section {
+  padding: 6rem 0;
+  background-color: var(--color-bg);
+
+  @include mix.respond-to(md) { padding: 8rem 0; }
+
+  &__container {
+    @include mix.container;
+  }
+
+  &__header {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  &__label {
+    display: inline-block;
+    font-size: 0.6875rem;
+    font-weight: $font-weight-bold;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-primary);
+    margin-bottom: $spacing-sm;
+
+    &--pink {
+      color: var(--color-accent-2);
+    }
+  }
+
+  &__title {
+    font-size: clamp(1.875rem, 4vw, 2.75rem);
+    font-weight: 800;
+    color: var(--color-text);
+    line-height: $line-height-tight;
+    margin-bottom: $spacing-md;
+
+    &--news {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+    }
+  }
+
+  &__subtitle {
+    font-size: $font-size-base;
+    color: var(--color-text-muted);
+    line-height: $line-height-loose;
+  }
+}
+
+// ─── Shared buttons ───────────────────────────────────────────────────────────
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-sm;
+  padding: 1rem 2rem;
+  background: var(--gradient-button);
+  color: #fff;
+  font-size: $font-size-base;
+  font-weight: $font-weight-bold;
+  border-radius: $radius-full;
+  // Permanent glow — always on
+  box-shadow: var(--shadow-button);
+  transition:
+    transform 0.2s ease,
+    box-shadow $transition-normal;
+
+  &:hover {
+    transform: scale(1.05);
+    box-shadow: var(--shadow-button-hover);
+  }
+}
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-sm;
+  padding: 1rem 2rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: $font-size-base;
+  font-weight: $font-weight-semibold;
+  border-radius: $radius-full;
+  backdrop-filter: blur(8px);
+  transition: transform 0.2s ease, background $transition-normal;
+
+  &:hover {
+    transform: scale(1.05);
+    background: rgba(255, 255, 255, 0.08);
+  }
+}
+
+// ════════════════════════════════════════════════════════════ HERO ════
+.hero {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(ellipse 80% 60% at 50% 0%, #1a1535 0%, var(--color-bg) 60%);
+  padding: calc($navbar-height + 3rem) $spacing-lg 5rem;
+  position: relative;
+  overflow: hidden;
+
+  // ─── Ambient glow orbs behind the logo ────────────────────────────────────
+  &__orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(60px);
+    pointer-events: none;
+  }
+
+  &__orb--1 {
+    width: 600px;
+    height: 600px;
+    top: -10%;
+    left: 30%;
+    transform: translateX(-50%);
+    background: rgba(124, 108, 255, 0.07);
+  }
+
+  &__orb--2 {
+    width: 400px;
+    height: 400px;
+    top: 20%;
+    right: -5%;
+    background: rgba(121, 223, 255, 0.05);
+  }
+
+  &__orb--3 {
+    width: 300px;
+    height: 300px;
+    bottom: 10%;
+    left: 5%;
+    background: rgba(255, 139, 207, 0.04);
+  }
+
+  &__content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: $spacing-lg;
+    width: 100%;
+    max-width: 740px;
+  }
+
+  &__logo-wrap {
+    width: min(520px, 85vw);
+  }
+
+  &__logo {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+    display: block;
+    filter: drop-shadow(0 0 60px rgba(124, 108, 255, 0.5));
+  }
+
+  &__eyebrow {
+    font-size: $font-size-sm;
+    color: var(--color-text-dim);
+    letter-spacing: 0.05em;
+    margin: 0;
+  }
+
+  // All three lines get the gradient
+  &__heading {
+    font-size: clamp(2.5rem, 6vw, 4rem);
+    font-weight: 800;
+    line-height: 1.1;
+    margin: 0;
+    letter-spacing: -0.02em;
+    background: var(--gradient-heading);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent;
+  }
+
+  &__body {
+    font-size: $font-size-base;
+    color: rgba(255, 255, 255, 0.5);
+    max-width: 54ch;
+    line-height: $line-height-loose;
+    margin: 0;
+  }
+
+  &__cta {
+    display: flex;
+    gap: $spacing-md;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  // 16:9 YouTube container with accent glow
+  &__video-wrap {
+    position: relative;
+    width: 100%;
+    padding-bottom: 56.25%;
+    border-radius: 1rem;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow:
+      0 0 60px rgba(124, 108, 255, 0.2),
+      0 30px 80px rgba(0, 0, 0, 0.6);
+    margin-top: $spacing-sm;
+  }
+
+  &__video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+
+  // Holographic corner accents
+  &__video-corner {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    z-index: 2;
+    pointer-events: none;
+
+    &--tl {
+      top: 0;
+      left: 0;
+      border-top: 2px solid var(--color-accent);
+      border-left: 2px solid var(--color-primary);
+    }
+
+    &--br {
+      bottom: 0;
+      right: 0;
+      border-bottom: 2px solid var(--color-accent);
+      border-right: 2px solid var(--color-primary);
+    }
+  }
+
+  &__caption {
+    font-size: $font-size-xs;
+    color: var(--color-text-muted);
+    letter-spacing: 0.03em;
+    margin: -$spacing-sm 0 0;
+  }
+}
+
+// ══════════════════════════════════════════════════════ GALLERY ════
+.gallery-section {
+  // No border-top — flows naturally into hero
+}
+
+.gallery-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+
+  @include mix.respond-to(sm) { grid-template-columns: 1fr 1fr; }
+  @include mix.respond-to(md) { gap: 20px; }
+}
+
+.gallery-card {
+  position: relative;
+  border-radius: 1rem;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  cursor: pointer;
+  border: 1px solid var(--color-border);
+  background: #0a0a14;
+  transition:
+    border-color $transition-normal,
+    box-shadow $transition-normal;
+
+  &:hover {
+    border-color: rgba(124, 108, 255, 0.3);
+    box-shadow: 0 0 20px rgba(124, 108, 255, 0.1);
+
+    .gallery-card__img {
+      transform: scale(1.05);
+    }
+  }
+
+  &__img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  &__overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 1.25rem 1.5rem;
+    background: linear-gradient(
+      to top,
+      rgba(15, 17, 23, 0.85) 0%,
+      rgba(15, 17, 23, 0.4) 50%,
+      transparent 100%
+    );
+    z-index: 1;
+  }
+
+  &__title {
+    font-size: $font-size-base;
+    font-weight: $font-weight-bold;
+    color: #fff;
+    margin: 0 0 0.25rem;
+    line-height: $line-height-tight;
+
+    @include mix.respond-to(md) {
+      font-size: $font-size-md;
+    }
+  }
+
+  &__sub {
+    font-size: $font-size-xs;
+    color: rgba(255, 255, 255, 0.65);
+    margin: 0;
+  }
+}
+
+// ══════════════════════════════════════════════════ FEATURES ════
+.features-section {
+  background: linear-gradient(180deg, var(--color-bg) 0%, #131620 100%);
+}
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: $spacing-md;
+
+  @include mix.respond-to(sm) { grid-template-columns: repeat(2, 1fr); }
+  @include mix.respond-to(lg) { grid-template-columns: repeat(3, 1fr); }
+}
+
+.feature-card {
+  --fc-rgb: 124, 108, 255;
+
+  padding: 1.5rem;
+  background-color: var(--color-surface);
+  border-radius: 1rem;
+  border: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+  transition:
+    border-color $transition-normal,
+    box-shadow $transition-normal,
+    transform $transition-normal;
+
+  &:hover {
+    border-color: rgba(var(--fc-rgb), 0.27);
+    transform: translateY(-6px);
+    box-shadow:
+      0 8px 40px rgba(0, 0, 0, 0.4),
+      0 0 20px rgba(var(--fc-rgb), 0.08);
+  }
+
+  &__icon-wrap {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(var(--fc-rgb), 0.1);
+    border: 1px solid rgba(var(--fc-rgb), 0.18);
+    border-radius: 0.75rem;
+    color: rgba(var(--fc-rgb), 1);
+    flex-shrink: 0;
+
+    svg {
+      width: 1.25rem;
+      height: 1.25rem;
+    }
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-sm;
+  }
+
+  &__title {
+    font-size: $font-size-base;
+    font-weight: $font-weight-semibold;
+    color: var(--color-text);
+    line-height: $line-height-tight;
+  }
+
+  &__desc {
+    font-size: $font-size-sm;
+    color: var(--color-text-muted);
+    line-height: $line-height-loose;
+    margin: 0;
+  }
+}
+
+// ══════════════════════════════════════════════ LATEST NEWS ════
+.news-section {
+  background-color: var(--color-bg);
+}
+
+.news-timeline {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding-left: 56px;
+
+  // Multicolor gradient vertical line
+  &::before {
+    content: '';
+    position: absolute;
+    left: 20px;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: linear-gradient(
+      180deg,
+      #7C6CFF 0%,
+      #79DFFF 40%,
+      #FF8BCF 75%,
+      transparent 100%
+    );
+  }
+}
+
+.news-entry {
+  position: relative;
+  display: flex;
+
+  // Gradient dot sitting ON the timeline line
+  &__dot {
+    position: absolute;
+    left: -42px;
+    top: 20px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #7C6CFF, #79DFFF);
+    box-shadow: 0 0 10px rgba(124, 108, 255, 0.6);
+    flex-shrink: 0;
+    z-index: 1;
+  }
+
+  &__card {
+    flex: 1;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: $radius-xl;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-md;
+    transition:
+      border-color $transition-normal,
+      transform $transition-fast;
+
+    &:hover {
+      border-color: rgba(124, 108, 255, 0.25);
+      transform: translateY(-2px);
+    }
+  }
+
+  &__meta {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+  }
+
+  &__date {
+    font-size: $font-size-xs;
+    color: var(--color-text-muted);
+  }
+
+  &__title {
+    font-size: $font-size-md;
+    font-weight: $font-weight-bold;
+    color: var(--color-text);
+    line-height: $line-height-tight;
+  }
+
+  &__summary {
+    font-size: $font-size-sm;
+    color: var(--color-text-muted);
+    line-height: $line-height-loose;
+    margin: 0;
+  }
+
+  &__read-more {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    color: var(--color-accent);
+    cursor: pointer;
+    transition: gap $transition-fast;
+
+    .news-entry__card:hover & {
+      gap: $spacing-sm;
+    }
+  }
+}
+
+// Unified news tag — single indigo style
+.news-tag {
+  display: inline-block;
+  padding: 0.125rem 0.75rem;
+  border-radius: $radius-full;
+  font-size: 0.75rem;
+  font-weight: $font-weight-semibold;
+  background: rgba(124, 108, 255, 0.15);
+  color: #7C6CFF;
+}
+
+// ═══════════════════════════════════════════════ FINAL CTA ════
+.cta-section {
+  position: relative;
+  padding: 8rem $spacing-lg;
+  background: linear-gradient(180deg, var(--color-bg) 0%, #12101e 100%);
+  overflow: hidden;
+  text-align: center;
+
+  // Radial glow behind content
+  &::before {
+    content: '';
+    position: absolute;
+    width: 70vw;
+    max-width: 800px;
+    aspect-ratio: 1;
+    top: 60%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(ellipse 60% 50% at 50% 60%, rgba(124, 108, 255, 0.15), transparent);
+    pointer-events: none;
+  }
+
+  // Decorative gradient top border line
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(124, 108, 255, 0.27),
+      rgba(121, 223, 255, 0.27),
+      transparent
+    );
+  }
+
+  &__container {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: $spacing-lg;
+    max-width: 620px;
+    margin: 0 auto;
+  }
+
+  &__badge {
+    display: inline-block;
+    padding: 0.375rem 1rem;
+    background: rgba(124, 108, 255, 0.12);
+    border: 1px solid rgba(124, 108, 255, 0.25);
+    border-radius: $radius-full;
+    font-size: 0.6875rem;
+    font-weight: $font-weight-bold;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-primary);
+  }
+
+  // Full heading gradient — same treatment as hero
+  &__heading {
+    font-size: clamp(2rem, 6vw, 3.5rem);
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin: 0;
+    background: var(--gradient-cta);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent;
+  }
+
+  &__body {
+    font-size: $font-size-base;
+    color: var(--color-text-muted);
+    line-height: $line-height-loose;
+    margin: 0;
+  }
+}
+
+// Large glowing download button — same gradient + permanent glow as btn-primary
+.btn-download-now {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-sm;
+  padding: 1rem 2.25rem;
+  background: var(--gradient-button);
+  color: #fff;
+  font-size: $font-size-md;
+  font-weight: $font-weight-bold;
+  border-radius: $radius-full;
+  box-shadow: var(--shadow-button);
+  transition:
+    transform 0.2s ease,
+    box-shadow $transition-normal;
+
+  &:hover {
+    transform: scale(1.05) translateY(-2px);
+    box-shadow: var(--shadow-button-hover);
+  }
+
+  &:active {
+    transform: translateY(-1px);
+  }
+}

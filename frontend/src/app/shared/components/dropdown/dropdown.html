@@ -1,0 +1,19 @@
+<div class="dropdown" [class.dropdown--open]="isOpen()">
+  <button class="dropdown__trigger" type="button" (click)="toggle()">
+    {{ selectedLabel }}
+    <span class="dropdown__arrow">&#9660;</span>
+  </button>
+  @if (isOpen()) {
+    <ul class="dropdown__menu">
+      @for (option of options(); track option.value) {
+        <li
+          class="dropdown__item"
+          [class.dropdown__item--active]="option.value === selected()"
+          (click)="select(option.value)"
+        >
+          {{ option.label }}
+        </li>
+      }
+    </ul>
+  }
+</div>

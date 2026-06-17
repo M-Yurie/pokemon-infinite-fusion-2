@@ -1,0 +1,224 @@
+@use 'variables' as *;
+@use 'mixins' as mix;
+
+// ════════════════════════════════════════════════════════════ HERO ════
+.faq-hero {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: calc($navbar-height + 5rem) $spacing-lg 5rem;
+  text-align: center;
+  overflow: hidden;
+  background: radial-gradient(ellipse 70% 50% at 50% 0%, #1a1535 0%, var(--color-bg) 70%);
+
+  &__orb {
+    position: absolute;
+    width: 500px;
+    height: 500px;
+    top: -20%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 50%;
+    filter: blur(80px);
+    background: rgba(124, 108, 255, 0.08);
+    pointer-events: none;
+  }
+
+  &__top-line {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(124, 108, 255, 0.33), rgba(121, 223, 255, 0.33), transparent);
+    pointer-events: none;
+  }
+
+  &__content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: $spacing-lg;
+    max-width: 600px;
+  }
+
+  // Large "?" icon card with purple glow
+  &__icon-card {
+    width: 88px;
+    height: 88px;
+    background: rgba(124, 108, 255, 0.1);
+    border: 1px solid rgba(124, 108, 255, 0.22);
+    border-radius: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 60px rgba(124, 108, 255, 0.25);
+  }
+
+  &__icon-q {
+    font-size: 2.5rem;
+    font-weight: 800;
+    line-height: 1;
+    background: linear-gradient(135deg, #7C6CFF, #79DFFF);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent;
+  }
+
+  &__heading {
+    font-size: clamp(2rem, 5vw, 3.25rem);
+    font-weight: 800;
+    line-height: 1.1;
+    color: var(--color-text);
+    margin: 0;
+  }
+
+  &__subtitle {
+    font-size: $font-size-base;
+    color: rgba(255, 255, 255, 0.45);
+    line-height: $line-height-loose;
+    max-width: 50ch;
+    margin: 0;
+  }
+
+  // Discord button — gradient + permanent glow
+  &__discord-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: $spacing-sm;
+    padding: 1rem 2rem;
+    background: var(--gradient-button);
+    color: #fff;
+    font-size: $font-size-base;
+    font-weight: $font-weight-bold;
+    border-radius: $radius-full;
+    box-shadow: var(--shadow-button);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+    &:hover {
+      transform: scale(1.05);
+      box-shadow: var(--shadow-button-hover);
+    }
+  }
+}
+
+// ══════════════════════════════════════════ FAQ CONTENT ════
+.faq-content {
+  padding: 4rem $spacing-lg 7rem;
+  background: var(--color-bg);
+
+  &__inner {
+    max-width: 760px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 3.5rem;
+  }
+}
+
+// ─── Category ─────────────────────────────────────────────────────────────────
+.faq-category {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+
+  &__label {
+    font-size: 0.6875rem;
+    font-weight: $font-weight-bold;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin: 0 0 $spacing-sm;
+  }
+}
+
+// ─── FAQ List ─────────────────────────────────────────────────────────────────
+.faq-list {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+}
+
+// ─── FAQ Item (accordion card) ────────────────────────────────────────────────
+.faq-item {
+  background: rgba(29, 34, 48, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 1rem;
+  overflow: hidden;
+  cursor: pointer;
+  transition:
+    background 0.25s ease,
+    border-color 0.25s ease;
+
+  &:hover {
+    border-color: rgba(124, 108, 255, 0.25);
+    background: var(--color-surface);
+  }
+
+  &--open {
+    background: var(--color-surface);
+    border-color: rgba(124, 108, 255, 0.25);
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: $spacing-md;
+    padding: 1.125rem 1.25rem;
+  }
+
+  &__question {
+    font-weight: $font-weight-semibold;
+    font-size: $font-size-sm;
+    color: var(--color-text);
+    line-height: $line-height-tight;
+    flex: 1;
+  }
+
+  &__chevron {
+    color: rgba(255, 255, 255, 0.35);
+    flex-shrink: 0;
+    transition: transform 0.3s ease;
+
+    svg {
+      width: 16px;
+      height: 16px;
+      display: block;
+    }
+
+    &--open {
+      transform: rotate(180deg);
+    }
+  }
+
+  // CSS accordion — max-height transition
+  &__answer-wrap {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition:
+      max-height 0.35s ease,
+      opacity 0.3s ease;
+
+    &--open {
+      max-height: 400px;
+      opacity: 1;
+    }
+  }
+
+  &__answer {
+    margin: 0 1.25rem 1.25rem;
+    padding: 1rem;
+    border-radius: 0.75rem;
+    font-size: $font-size-sm;
+    line-height: 1.7;
+    color: rgba(255, 255, 255, 0.6);
+    background: rgba(124, 108, 255, 0.06);
+    border: 1px solid rgba(124, 108, 255, 0.12);
+  }
+}

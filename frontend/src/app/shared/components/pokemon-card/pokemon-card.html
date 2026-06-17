@@ -1,0 +1,11 @@
+<div class="pokemon-card">
+  <div class="pokemon-card__image-wrapper">
+    @if (imageUrl()) {
+      <img class="pokemon-card__image" [src]="imageUrl()" [alt]="name()" loading="lazy" />
+    }
+  </div>
+  <div class="pokemon-card__info">
+    <span class="pokemon-card__id">#{{ id() }}</span>
+    <span class="pokemon-card__name">{{ name() }}</span>
+  </div>
+</div>

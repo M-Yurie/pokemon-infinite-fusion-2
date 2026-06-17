@@ -1,0 +1,314 @@
+<!-- ══════════════════════════════════════════════════════════ DEX PAGE ══ -->
+<div class="dex-page">
+
+  <!-- ─── Overlays (close dropdowns / search on outside click) ────────────── -->
+  @if (sortOpen()) {
+    <div class="dex-overlay" (click)="closeSortOpen()"></div>
+  }
+  @if (abilityOpen()) {
+    <div class="dex-overlay" (click)="closeAbilityOpen()"></div>
+  }
+  @if (searchOpen()) {
+    <div class="dex-overlay" (click)="closeSearch()"></div>
+  }
+
+  <!-- ─── Gallery modal ──────────────────────────────────────────────────── -->
+  @if (galleryFusion()) {
+    <div class="dex-modal-backdrop" (click)="closeGallery()">
+      <div class="dex-modal" (click)="stopEvent($event)">
+        <div class="dex-modal__header">
+          <span class="dex-modal__title">{{ galleryFusion()!.name }} — Custom Sprites</span>
+          <button class="dex-modal__close" (click)="closeGallery()" aria-label="Close">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+        <div class="dex-modal__grid">
+          @if (!galleryUrls().length) {
+            <p class="dex-modal__loading">Loading sprites…</p>
+          }
+          @for (url of galleryUrls(); track url; let i = $index) {
+            <div class="dex-modal__sprite-item">
+              <img class="dex-modal__sprite-img" [src]="url" [alt]="variantLabel(i)" loading="lazy" />
+              <span class="dex-modal__sprite-label">{{ variantLabel(i) }}</span>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
+
+  <div class="dex-page__inner">
+
+    <!-- ══════════════════════════════════════════════ CONTROLS ROW ══ -->
+    <div class="dex-controls">
+
+      <!-- Either / Head / Body -->
+      <div class="dex-position">
+        @for (opt of positions; track opt.v) {
+          <button
+            class="dex-position__btn"
+            [class.dex-position__btn--active]="filters().position === opt.v"
+            (click)="setPosition(opt.v)"
+          >{{ opt.label }}</button>
+        }
+      </div>
+
+      <!-- Search with Pokémon chips -->
+      <div class="dex-search" [class.dex-search--open]="searchOpen()">
+        @for (p of filters().selectedPokemon; track p.id) {
+          <span class="dex-chip">
+            <span class="dex-chip__name">{{ p.name }}</span>
+            <button class="dex-chip__remove" (click)="deselectPokemon(p.id)" aria-label="Remove {{p.name}}">
+              <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true">
+                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          </span>
+        }
+        @if (filters().selectedPokemon.length < 2) {
+          <svg class="dex-search__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input
+            class="dex-search__input"
+            type="text"
+            placeholder="Search Pokémon…"
+            [value]="searchQuery()"
+            (input)="onSearchInput($any($event.target).value)"
+            (focus)="onSearchInput(searchQuery())"
+            autocomplete="off"
+          />
+        }
+        @if (searchOpen()) {
+          <div class="dex-search__dropdown">
+            @for (p of searchResults(); track p.id) {
+              <button class="dex-search__option" (click)="selectPokemon(p)">
+                <span class="dex-search__option-id">#{{ p.id }}</span>
+                {{ p.name }}
+              </button>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Sort dropdown -->
+      <div class="dex-sort">
+        <button
+          class="dex-sort__btn"
+          [class.dex-sort__btn--open]="sortOpen()"
+          (click)="toggleSortOpen(); $event.stopPropagation()"
+        >
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="20" y2="12"/><line x1="12" y1="18" x2="20" y2="18"/>
+          </svg>
+          {{ sortLabel() }}
+          <svg class="dex-sort__chevron" [class.dex-sort__chevron--open]="sortOpen()" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </button>
+        @if (sortOpen()) {
+          <div class="dex-sort__dropdown">
+            @for (opt of sortOptions; track opt.value) {
+              <button
+                class="dex-sort__option"
+                [class.dex-sort__option--active]="filters().sortBy === opt.value"
+                (click)="setSortBy(opt.value)"
+              >{{ opt.label }}</button>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Filters toggle -->
+      <button
+        class="dex-btn dex-btn--filters"
+        [class.dex-btn--active]="showFilters()"
+        (click)="toggleShowFilters()"
+      >
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+        </svg>
+        Filters
+        @if (activeFilterCount() > 0) {
+          <span class="dex-btn__badge">{{ activeFilterCount() }}</span>
+        }
+      </button>
+
+      <!-- Random -->
+      <button class="dex-btn dex-btn--purple dex-btn--random">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/>
+          <polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/>
+        </svg>
+        Random
+      </button>
+
+      <!-- Saved -->
+      <button
+        class="dex-btn dex-btn--saved"
+        [class.dex-btn--pink]="filters().showFavorites"
+        (click)="toggleFavoritesOnly()"
+      >
+        <svg width="13" height="13" viewBox="0 0 24 24" [attr.fill]="filters().showFavorites ? '#FF8BCF' : 'none'" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+        </svg>
+        Saved{{ favoritesCount > 0 ? ' (' + favoritesCount + ')' : '' }}
+      </button>
+
+    </div>
+
+    <!-- ════════════════════════════════════════════ FILTERS PANEL ══ -->
+    <div class="dex-filters" [class.dex-filters--open]="showFilters()">
+      <div class="dex-filters__body">
+        <div class="dex-filters__grid">
+
+          <!-- Left: Type filter -->
+          <div class="dex-filters__col">
+            <div class="dex-filters__col-header">
+              <span class="dex-filters__label">FILTER BY TYPE</span>
+              @if (filters().types.length > 0) {
+                <button class="dex-filters__clear-link" (click)="clearTypes()">Clear</button>
+              }
+            </div>
+            <div class="dex-type-pills">
+              @for (type of allTypes; track type) {
+                <button
+                  class="dex-type-pill"
+                  [class.dex-type-pill--active]="typeIsActive(type)"
+                  [style.--tc]="typeColor(type)"
+                  (click)="toggleType(type)"
+                >{{ type }}</button>
+              }
+            </div>
+          </div>
+
+          <!-- Right: Ability + Show toggles -->
+          <div class="dex-filters__col">
+            <div class="dex-ability">
+              <span class="dex-filters__label">ABILITY</span>
+              <div
+                class="dex-ability__input-wrap"
+                [class.dex-ability__input-wrap--open]="abilityOpen()"
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <input
+                  class="dex-ability__input"
+                  type="text"
+                  placeholder="Filter by ability…"
+                  [value]="abilityQuery()"
+                  (input)="onAbilityInput($any($event.target).value)"
+                  (focus)="toggleAbilityOpen()"
+                />
+                @if (abilityQuery()) {
+                  <button class="dex-ability__clear" (click)="clearAbility()">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
+                      <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                  </button>
+                }
+              </div>
+            </div>
+
+            <div class="dex-toggles">
+              <span class="dex-filters__label">SHOW IN RESULTS</span>
+              <div class="dex-toggles__list">
+                <label class="dex-toggle">
+                  <button class="dex-toggle__track" [class.dex-toggle__track--on]="filters().showLegendaries" (click)="toggleLegendaries()">
+                    <span class="dex-toggle__thumb"></span>
+                  </button>
+                  <span class="dex-toggle__label">Show Legendaries</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        @if (activeFilterCount() > 0) {
+          <div class="dex-filters__footer">
+            <button class="dex-filters__clear-all" (click)="clearFilters()">Clear all filters</button>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════ CARD GRID ══ -->
+
+    <!-- Initial loading state -->
+    @if (loading()) {
+      <div class="dex-loading">
+        <div class="dex-dots">
+          @for (c of dots; track c) {
+            <div class="dex-dot" [style.background]="c"></div>
+          }
+        </div>
+      </div>
+    }
+
+    @if (!loading()) {
+      <div class="dex-grid">
+        @for (card of displayedCards(); track card.id) {
+          <div
+            class="dex-card"
+            [class.dex-card--favorited]="isFavorite(card.id)"
+            [style.--primary-type-color]="typeColor(card.types[0])"
+          >
+
+            <!-- Sprite area -->
+            <div class="dex-card__sprite-area">
+              <div class="dex-card__sprite" [style]="spriteStyle(card.head.id, card.body.id)"></div>
+              <div class="dex-card__glow"></div>
+              @if (spriteCount(card.id) > 1) {
+                <button
+                  class="dex-card__sprite-count"
+                  (click)="openGallery(card, $event)"
+                  [title]="spriteCount(card.id) + ' custom sprites'"
+                >{{ spriteCountLabel(spriteCount(card.id)) }}</button>
+              }
+            </div>
+
+            <!-- Info bar -->
+            <div class="dex-card__info">
+              <p class="dex-card__id">#{{ card.head.id }}.{{ card.body.id }}</p>
+              <p class="dex-card__name">{{ card.name }}</p>
+              <div class="dex-card__bottom-row">
+                <div class="dex-card__types">
+                  @for (type of card.types; track type) {
+                    <span class="dex-card__type-badge" [style.--tc]="typeColor(type)">{{ type }}</span>
+                  }
+                </div>
+                <button
+                  class="dex-card__fav-btn"
+                  [class.dex-card__fav-btn--active]="isFavorite(card.id)"
+                  (click)="toggleFavorite(card.id, $event)"
+                  aria-label="Toggle favorite"
+                >
+                  <svg width="12" height="12" viewBox="0 0 24 24" [attr.fill]="isFavorite(card.id) ? '#FF8BCF' : 'none'" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+          </div>
+        }
+
+        <!-- Infinite-scroll sentinel -->
+        <div #sentinel class="dex-sentinel"></div>
+      </div>
+
+      <!-- Loading-more indicator (pool rebuild / initial) -->
+      @if (loadingMore()) {
+        <div class="dex-dots dex-dots--more">
+          @for (c of dots; track c) {
+            <div class="dex-dot" [style.background]="c"></div>
+          }
+        </div>
+      }
+    }
+
+  </div>
+</div>

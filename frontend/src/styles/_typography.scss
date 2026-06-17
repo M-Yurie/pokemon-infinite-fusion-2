@@ -1,0 +1,36 @@
+@use 'variables' as *;
+
+body {
+  font-family: $font-family-base;
+  font-size: $font-size-base;
+  font-weight: $font-weight-normal;
+  line-height: $line-height-normal;
+  color: var(--color-text);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  line-height: $line-height-tight;
+  font-weight: $font-weight-bold;
+  color: var(--color-text);
+}
+
+h1 { font-size: $font-size-3xl; }
+h2 { font-size: $font-size-2xl; }
+h3 { font-size: $font-size-xl; }
+h4 { font-size: $font-size-lg; }
+h5 { font-size: $font-size-md; }
+h6 { font-size: $font-size-base; }
+
+p {
+  line-height: $line-height-loose;
+}
+
+small {
+  font-size: $font-size-sm;
+}
+
+code,
+pre {
+  font-family: $font-family-mono;
+  font-size: $font-size-sm;
+}
