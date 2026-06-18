@@ -10,14 +10,12 @@ export type PoolItem =
 const NORMAL_FLYING_IDS = new Set([
   16, 17, 18,           // Pidgey, Pidgeotto, Pidgeot
   21, 22,               // Spearow, Fearow
-  41, 42,               // Zubat, Golbat
   83,                   // Farfetch'd
   84, 85,               // Doduo, Dodrio
   163, 164,             // Hoothoot, Noctowl
-  198,                  // Murkrow
-  276, 277,             // Taillow, Swellow
-  278, 279,             // Wingull, Pelipper
-  333, 334,             // Swablu, Altaria
+  417,                  // Fletchling
+  442,                  // Swablu
+  514, 515,             // Taillow, Swellow
 ]);
 
 @Injectable({ providedIn: 'root' })
