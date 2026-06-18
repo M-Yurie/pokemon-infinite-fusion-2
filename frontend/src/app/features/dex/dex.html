@@ -380,7 +380,7 @@
                 <button
                   class="dex-card__fav-btn"
                   [class.dex-card__fav-btn--active]="isFavorite(card.id)"
-                  (click)="toggleFavorite(card.id, $event)"
+                  (click)="toggleFavorite(card.id, $event); $event.stopPropagation(); $event.preventDefault()"
                   aria-label="Toggle favorite"
                 >
                   <svg width="12" height="12" viewBox="0 0 24 24" [attr.fill]="isFavorite(card.id) ? '#FF8BCF' : 'none'" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
