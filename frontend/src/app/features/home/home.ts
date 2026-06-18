@@ -37,62 +37,56 @@ export class Home implements AfterViewInit, OnDestroy {
 
   readonly galleryItems: GalleryItem[] = [
     {
-      title: 'Open World Exploration',
-      subtitle: 'Roam the living Hoenn region',
-      imageUrl: 'https://images.unsplash.com/photo-1646364437169-4bef277201c6?w=800',
+      title: 'The Fusion Index',
+      subtitle: 'Discover thousands of unique fusion combinations',
+      imageUrl: 'assets/images/gallery-1.jpg',
     },
     {
-      title: 'Lush Environments',
-      subtitle: 'Every route breathes with life',
-      imageUrl: 'https://images.unsplash.com/photo-1633097833600-b1cf6e3a831a?w=800',
+      title: 'Hoenn Overworld',
+      subtitle: 'Explore the vibrant Hoenn region like never before',
+      imageUrl: 'assets/images/gallery-2.jpg',
     },
     {
-      title: 'Crystal Fusion System',
-      subtitle: 'Prismatic power at your command',
-      imageUrl: 'https://images.unsplash.com/photo-1521133573892-e44906baee46?w=800',
+      title: 'Starter Fusions',
+      subtitle: 'Meet the new Hoenn starters and their fusions',
+      imageUrl: 'assets/images/gallery-3.jpg',
     },
     {
-      title: 'A World Beyond Limits',
-      subtitle: 'Journey under the aurora skies',
-      imageUrl: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=800',
+      title: 'Dynamic Weather',
+      subtitle: 'A living world that changes around you',
+      imageUrl: 'assets/images/gallery-4.jpg',
     },
   ];
 
   readonly features: FeatureItem[] = [
     {
-      title: 'Open World Exploration',
-      description:
-        'Roam a fully reimagined Hoenn region with seamless areas, hidden secrets, and dynamic weather systems.',
-      colorRgb: '121, 223, 255',
-    },
-    {
-      title: 'Walking Pokémon',
-      description:
-        'Every Pokémon in your party follows you through the world, reacting to the environment around them.',
-      colorRgb: '110, 231, 183',
-    },
-    {
-      title: 'Modern Battle System',
-      description:
-        'A completely rebuilt battle engine with animated moves, smart AI, and a revamped competitive meta.',
-      colorRgb: '255, 139, 207',
-    },
-    {
       title: 'Fusion Mechanics',
-      description:
-        'Combine any two Pokémon into a never-before-seen fusion with unique sprites, stats, and movesets.',
+      description: 'Combine any two Pokémon to create unique fusions, with over 327,000 possible combinations.',
       colorRgb: '124, 108, 255',
     },
     {
-      title: 'Quality of Life',
-      description:
-        'Box anywhere, auto-battle, summary search, and dozens of modern improvements for the best experience.',
+      title: 'Overworld Encounters',
+      description: 'Wild Pokémon appear directly in the overworld, reacting to the player instead of random hidden encounters.',
+      colorRgb: '110, 231, 183',
+    },
+    {
+      title: 'Dynamic Weather',
+      description: 'Weather changes dynamically across Hoenn, affecting which Pokémon appear in the wild.',
+      colorRgb: '121, 223, 255',
+    },
+    {
+      title: 'Save File Integration',
+      description: 'Transfer your team to and from the original Pokémon Infinite Fusion using a special PC box feature.',
       colorRgb: '255, 212, 107',
     },
     {
+      title: 'Modern Battle System',
+      description: 'A completely rebuilt battle engine with animated moves, smart AI, and a revamped competitive meta.',
+      colorRgb: '255, 139, 207',
+    },
+    {
       title: 'Beautiful Pixel Art',
-      description:
-        'Thousands of hand-crafted fusion sprites and overworld tiles. Every pixel placed with intention.',
+      description: 'Over 230,000 community-made fusion sprites, every pixel placed with intention.',
       colorRgb: '255, 139, 207',
     },
   ];

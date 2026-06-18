@@ -294,51 +294,35 @@
         <div class="pd-section-bar">Weaknesses</div>
         <div class="pd-section-body">
           @if (sameWeaknesses()) {
-            <!-- One centered table -->
-            <div class="pd-weak-table">
+            <!-- Single: 2-column grid (multiplier | types) -->
+            <div class="pd-weak-single">
               @for (group of leftWeaknesses(); track group.multiplier) {
-                <div class="pd-weak-row pd-weak-row--single">
-                  <span class="pd-weak-row__multiplier">{{ group.label }}</span>
-                  <div class="pd-weak-row__badges pd-weak-row__badges--single">
+                @if (group.types.length > 0) {
+                  <div class="pd-weak-mult">{{ group.label }}</div>
+                  <div class="pd-weak-badges">
                     @for (t of group.types; track t) {
                       <span class="pd-type-badge" [style.--tc]="typeColor(t)">{{ t }}</span>
                     }
                   </div>
-                  <span class="pd-weak-row__multiplier pd-weak-row__multiplier--right">{{ group.label }}</span>
-                </div>
+                }
               }
             </div>
           } @else {
-            <!-- Two tables side by side -->
-            <div class="pd-weak-split">
-              <div class="pd-weak-panel">
-                <div class="pd-weak-table">
-                  @for (group of leftWeaknesses(); track group.multiplier) {
-                    <div class="pd-weak-row">
-                      <span class="pd-weak-row__multiplier">{{ group.label }}</span>
-                      <div class="pd-weak-row__badges">
-                        @for (t of group.types; track t) {
-                          <span class="pd-type-badge" [style.--tc]="typeColor(t)">{{ t }}</span>
-                        }
-                      </div>
-                    </div>
+            <!-- Split: 3-column grid (left types | multiplier | right types) -->
+            <div class="pd-weak-combined">
+              @for (row of weaknessRows(); track row.multiplier) {
+                <div class="pd-weak-badges pd-weak-badges--left">
+                  @for (t of row.leftTypes; track t) {
+                    <span class="pd-type-badge" [style.--tc]="typeColor(t)">{{ t }}</span>
                   }
                 </div>
-              </div>
-              <div class="pd-weak-panel">
-                <div class="pd-weak-table">
-                  @for (group of rightWeaknesses(); track group.multiplier) {
-                    <div class="pd-weak-row pd-weak-row--right">
-                      <div class="pd-weak-row__badges pd-weak-row__badges--right">
-                        @for (t of group.types; track t) {
-                          <span class="pd-type-badge" [style.--tc]="typeColor(t)">{{ t }}</span>
-                        }
-                      </div>
-                      <span class="pd-weak-row__multiplier pd-weak-row__multiplier--right">{{ group.label }}</span>
-                    </div>
+                <div class="pd-weak-mult">{{ row.multiplier }}</div>
+                <div class="pd-weak-badges pd-weak-badges--right">
+                  @for (t of row.rightTypes; track t) {
+                    <span class="pd-type-badge" [style.--tc]="typeColor(t)">{{ t }}</span>
                   }
                 </div>
-              </div>
+              }
             </div>
           }
         </div>

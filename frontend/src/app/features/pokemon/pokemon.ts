@@ -173,8 +173,20 @@ export class PokemonDetail implements OnInit, OnDestroy {
   readonly rightWeaknesses = computed(() => this.computeWeaknesses(this.rightTypes()));
 
   readonly sameWeaknesses = computed(() => {
-    const lt = this.leftTypes(), rt = this.rightTypes();
-    return lt.length === rt.length && lt.every((t, i) => t === rt[i]);
+    const lt = new Set(this.leftTypes()), rt = new Set(this.rightTypes());
+    if (lt.size !== rt.size) return false;
+    return [...lt].every(t => rt.has(t));
+  });
+
+  readonly weaknessRows = computed(() => {
+    const lw = this.leftWeaknesses(), rw = this.rightWeaknesses();
+    return lw
+      .map((lg, i) => ({
+        multiplier: lg.label,
+        leftTypes: lg.types,
+        rightTypes: rw[i]?.types ?? [],
+      }))
+      .filter(row => row.leftTypes.length > 0 || row.rightTypes.length > 0);
   });
 
   readonly headEvoInfo = computed((): EvoInfo => {
@@ -497,7 +509,7 @@ export class PokemonDetail implements OnInit, OnDestroy {
       groups.get(m)!.push(atkType);
     }
     return [4, 2, 1, 0.5, 0.25, 0]
-      .map(m => ({ multiplier: m, label: this.multLabel(m), types: groups.get(m)! }));
+      .map(m => ({ multiplier: m, label: this.multLabel(m), types: groups.get(m) ?? [] }));
   }
 
   private getEvoInfo(chain: EvolutionEntry[], currentId: number): EvoInfo {

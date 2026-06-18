@@ -388,7 +388,7 @@
   grid-template-columns: 1fr 80px 1fr;
   row-gap: 12px;
   column-gap: 0.75rem;
-  align-items: center;
+  align-items: stretch;
 
   @media (max-width: #{$bp-sm}) {
     grid-template-columns: 1fr 3.5rem 1fr;
@@ -396,6 +396,9 @@
 }
 
 .pd-stat-name {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   text-align: center;
   font-size: $font-size-xs;
   font-weight: $font-weight-bold;
@@ -427,13 +430,13 @@
 }
 
 .pd-stat-diff {
+  display: none !important;
   font-size: $font-size-xs;
   font-weight: $font-weight-semibold;
   font-variant-numeric: tabular-nums;
 
   &--pos { color: #22c55e; }
   &--neg { color: #ef4444; }
-  display: none !important;
 }
 
 // ════════════════════════════════════════════════════ ABILITIES ════
@@ -485,95 +488,42 @@
 }
 
 // ════════════════════════════════════════════════════ WEAKNESSES ════
-.pd-weak-table {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  // max-width: 100%;
-  flex: 1;
-}
 
-
-.pd-weak-row {
+.pd-weak-single {
   display: grid;
-  grid-template-columns: 36px minmax(0, 1fr);
+  grid-template-columns: 2.5rem 1fr;
+  column-gap: 10px;
+  row-gap: 6px;
   align-items: start;
-  gap: 6px;
-  margin-bottom: 6px;
-
-  &--right {
-    grid-template-columns: minmax(0, 1fr) 36px;
-    align-items: end;
-    gap: 6px;
-    margin-bottom: 6px;
-  }
-  &--single {
-    grid-template-columns: 46px minmax(0, 1fr) 46px;
-
-  }
-
-       align-items: center;
-     gap: 6px;
-    //  margin-bottom: 6px;
+  max-width: 480px;
+  margin: 0 auto;
 }
 
-.pd-weak-row__multiplier {
-  font-size: 14px;
+.pd-weak-combined {
+  display: grid;
+  grid-template-columns: 1fr 2.5rem 1fr;
+  column-gap: 10px;
+  row-gap: 8px;
+  align-items: start;
+}
+
+.pd-weak-mult {
+  font-size: 13px;
   font-weight: $font-weight-bold;
   color: rgba(255, 255, 255, 0.7);
-  padding-top: 3px;
-  flex-shrink: 0;
-  justify-content: center;
-  align-items: center;
+  white-space: nowrap;
+  text-align: center;
+  padding-top: 2px;
+  line-height: 1;
 }
 
-.pd-weak-row__multiplier--right {
-  justify-self: flex-end;
-  align-self: center;
-}
-
-.pd-weak-row__badges {
+.pd-weak-badges {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
-  flex: 1;
-}
 
-.pd-weak-row__badges--right {
-  justify-content: flex-end;
-}
-
-.pd-weak-row__badges--single {
-  justify-content: center;
-}
-
-.pd-weak-row--single .pd-weak-badges {
-  justify-content: center;
-}
-
-.pd-weak-split {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2rem;
-
-  @media (max-width: #{$bp-md}) {
-    grid-template-columns: 1fr;
-    gap: 1.25rem;
-  }
-}
-
-.pd-weak-panel {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-
-  &__label {
-    font-size: $font-size-xs;
-    font-weight: $font-weight-bold;
-    letter-spacing: 0.06em;
-    color: rgba(255, 255, 255, 0.35);
-    text-transform: uppercase;
-  }
+  &--left  { justify-content: flex-end; }
+  &--right { justify-content: flex-start; }
 }
 
 // ══════════════════════════════════════════════ EVOLUTION CHAIN ════

@@ -113,7 +113,8 @@
     align-items: center;
     gap: $spacing-xs;
     padding: 0.5rem 1.125rem;
-    background: var(--color-primary);
+    background: linear-gradient(135deg, #7C6CFF, #79DFFF);
+    box-shadow: 0 0 30px rgba(124, 108, 255, 0.45), 0 4px 20px rgba(0, 0, 0, 0.4);
     color: #fff;
     font-size: 0.8125rem;
     font-weight: $font-weight-semibold;
@@ -125,9 +126,7 @@
       transform $transition-fast;
 
     &:hover {
-      background: color.adjust(#7C6CFF, $lightness: 6%);
-      transform: translateY(-1px);
-      box-shadow: 0 4px 16px rgba(124, 108, 255, 0.4);
+      transform: scale(1.05)
     }
   }
 
