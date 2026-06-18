@@ -2,7 +2,7 @@ import {
   AfterViewInit, Component, ElementRef, NgZone, OnDestroy,
   ViewChild, computed, effect, inject, signal,
 } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { Pokemon } from '../../models/pokemon.model';
 import { DisplayCard, DexFilters, FusionPosition, SortOption } from '../../models/fusion.model';
 import { PokemonService }  from '../../core/services/pokemon.service';
@@ -21,7 +21,7 @@ const TYPE_COLORS: Record<string, string> = {
 
 @Component({
   selector: 'app-dex',
-  imports: [RouterLink],
+  imports: [],
   templateUrl: './dex.html',
   styleUrl: './dex.scss',
 })
@@ -30,6 +30,7 @@ export class Dex implements AfterViewInit, OnDestroy {
   private readonly fusionSvc  = inject(FusionService);
   readonly imageSvc   = inject(ImageService);
   private readonly zone       = inject(NgZone);
+  private readonly router     = inject(Router);
   readonly favSvc    = inject(FavoriteService);
   readonly filterSvc = inject(FilterService);
 
@@ -339,6 +340,17 @@ export class Dex implements AfterViewInit, OnDestroy {
   closeSortOpen(): void      { this.sortOpen.set(false); }
   closeAbilityOpen(): void   { this.abilityOpen.set(false); }
 
+  // ─── Random ───────────────────────────────────────────────────────────────
+  goToRandomFusion(): void {
+    const pool = this.pool;
+    if (!pool.length) return;
+
+    const randomIndex = Math.floor(Math.random() * pool.length);
+    const item = pool[randomIndex];
+    const id = item.kind === 'fusion' ? `${item.h.id}.${item.b.id}` : `${item.p.id}.${item.p.id}`;
+    void this.router.navigate(['/details', id]);
+  }
+
   // ─── Favorites ────────────────────────────────────────────────────────────
   toggleFavorite(cardId: string, event: MouseEvent): void {
     event.stopPropagation();
@@ -425,7 +437,7 @@ export class Dex implements AfterViewInit, OnDestroy {
       const bodyId = card.body.id;
       const col = bodyId % 10 === 0 ? 10 : bodyId % 10;
       const row = Math.ceil(bodyId / 10);
-      const x = (col - 1) * 192;
+      const x = col * 192;
       const y = (row - 1) * 192;
 
       const fallback = parent.querySelector('.sprite-fallback') as HTMLElement | null;
@@ -446,6 +458,12 @@ export class Dex implements AfterViewInit, OnDestroy {
       const placeholder = parent.querySelector('.dex-card__sprite-placeholder') as HTMLElement | null;
       if (placeholder) placeholder.style.display = 'flex';
     }
+  }
+
+  navigateToCard(card: DisplayCard, event: MouseEvent): void {
+    event.preventDefault();
+    const id = card.isFusion ? `${card.head.id}.${card.body!.id}` : `${card.head.id}.${card.head.id}`;
+    void this.router.navigate(['/details', id]);
   }
 
   typeColor(type: string): string    { return TYPE_COLORS[type] ?? '#9FA19F'; }

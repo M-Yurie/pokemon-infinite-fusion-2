@@ -55,6 +55,7 @@
   font-weight: $font-weight-bold;
   letter-spacing: 0.04em;
   padding: 6px 16px;
+  text-align: center;
 }
 
 .pd-section-body {
@@ -65,15 +66,22 @@
 // ════════════════════════════════════════════════ MOBILE EVO BTNS ════
 .pd-mobile-evo {
   display: none;
-  gap: 0.75rem;
-  flex-wrap: wrap;
 
   @media (max-width: #{$bp-md}) {
-    display: flex;
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 0;
   }
 
   &__wrap {
-    position: relative;
+    position: absolute;
+    top: 0;
+
+    &--left  { left: 0; }
+    &--right { right: 0; }
   }
 
   &__btn {
@@ -104,6 +112,8 @@
     overflow: hidden;
     z-index: 200;
     animation: dropIn 0.15s ease;
+
+    &--right { left: auto; right: 0; }
   }
 
   &__option {
@@ -126,11 +136,13 @@
 .pd-sprite-layout {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  gap: 1rem;
+  align-items: start;
+  gap: 1.5rem;
+  position: relative;
 
   @media (max-width: #{$bp-md}) {
     grid-template-columns: 1fr;
+    padding-top: 52px;
   }
 }
 
@@ -169,7 +181,7 @@
     background: rgba(124, 108, 255, 0.08);
   }
 
-  &--right { flex-direction: row-reverse; }
+  // &--right { flex-direction: row-reverse; }
 }
 
 // ─── Sprites center ───────────────────────────────────────────────────
@@ -263,6 +275,22 @@
   color: rgba(255, 255, 255, 0.15);
 }
 
+.pd-sprite-generated-badge {
+  position: absolute;
+  bottom: 6px;
+  left: 6px;
+  padding: 2px 6px;
+  border-radius: $radius-full;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 9px;
+  font-weight: $font-weight-bold;
+  letter-spacing: 0.04em;
+  pointer-events: none;
+  z-index: 2;
+}
+
 .pd-badge {
   position: absolute;
   top: 8px;
@@ -334,11 +362,15 @@
   font-size: $font-size-md;
   font-weight: $font-weight-bold;
   font-variant-numeric: tabular-nums;
+  min-width: 3ch;
 }
+
+.pd-stat-left .pd-stat-value { text-align: right; }
+.pd-stat-right .pd-stat-value { text-align: left; }
 
 .pd-stat-bar-wrap {
   width: 100%;
-  height: 4px;
+  height: 6px;
   background: rgba(255, 255, 255, 0.08);
   border-radius: $radius-full;
   overflow: hidden;
@@ -353,12 +385,13 @@
 // Comparison table
 .pd-stats-compare {
   display: grid;
-  grid-template-columns: 1fr 5rem 1fr;
-  gap: 0.375rem 0.75rem;
+  grid-template-columns: 1fr 80px 1fr;
+  row-gap: 12px;
+  column-gap: 0.75rem;
   align-items: center;
 
   @media (max-width: #{$bp-sm}) {
-    grid-template-columns: 1fr 4rem 1fr;
+    grid-template-columns: 1fr 3.5rem 1fr;
   }
 }
 
@@ -400,6 +433,7 @@
 
   &--pos { color: #22c55e; }
   &--neg { color: #ef4444; }
+  display: none !important;
 }
 
 // ════════════════════════════════════════════════════ ABILITIES ════
@@ -454,29 +488,67 @@
 .pd-weak-table {
   display: flex;
   flex-direction: column;
-  gap: 0.625rem;
+  gap: 4px;
+  // max-width: 100%;
+  flex: 1;
 }
+
 
 .pd-weak-row {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  align-items: start;
+  gap: 6px;
+  margin-bottom: 6px;
+
+  &--right {
+    grid-template-columns: minmax(0, 1fr) 36px;
+    align-items: end;
+    gap: 6px;
+    margin-bottom: 6px;
+  }
+  &--single {
+    grid-template-columns: 46px minmax(0, 1fr) 46px;
+
+  }
+
+       align-items: center;
+     gap: 6px;
+    //  margin-bottom: 6px;
 }
 
-.pd-weak-mult {
-  font-size: $font-size-xs;
+.pd-weak-row__multiplier {
+  font-size: 14px;
   font-weight: $font-weight-bold;
-  color: rgba(255, 255, 255, 0.45);
-  min-width: 2.25rem;
-  text-align: right;
+  color: rgba(255, 255, 255, 0.7);
+  padding-top: 3px;
   flex-shrink: 0;
+  justify-content: center;
+  align-items: center;
 }
 
-.pd-weak-types {
+.pd-weak-row__multiplier--right {
+  justify-self: flex-end;
+  align-self: center;
+}
+
+.pd-weak-row__badges {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.25rem;
+  gap: 4px;
+  flex: 1;
+}
+
+.pd-weak-row__badges--right {
+  justify-content: flex-end;
+}
+
+.pd-weak-row__badges--single {
+  justify-content: center;
+}
+
+.pd-weak-row--single .pd-weak-badges {
+  justify-content: center;
 }
 
 .pd-weak-split {
@@ -511,16 +583,27 @@
   gap: 1.5rem;
 }
 
-.pd-evo-chain {
+.pd-evo-tree {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  justify-content: center;
+  gap: 0.375rem;
 
   &--second {
     border-top: 1px solid rgba(255, 255, 255, 0.05);
     padding-top: 1.25rem;
+  }
+}
+
+.pd-evo-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  justify-content: center;
+
+  &--indented {
+    padding-left: 1.25rem;
   }
 }
 

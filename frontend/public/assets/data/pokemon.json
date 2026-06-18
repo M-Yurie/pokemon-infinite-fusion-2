@@ -666,8 +666,8 @@
     "slug": "pidgey",
     "name": "Pidgey",
     "types": [
-      "Normal",
-      "Flying"
+      "Flying",
+      "Normal"
     ],
     "stats": {
       "hp": 40,
@@ -715,8 +715,8 @@
     "slug": "pidgeotto",
     "name": "Pidgeotto",
     "types": [
-      "Normal",
-      "Flying"
+      "Flying",
+      "Normal"
     ],
     "stats": {
       "hp": 63,
@@ -764,8 +764,8 @@
     "slug": "pidgeot",
     "name": "Pidgeot",
     "types": [
-      "Normal",
-      "Flying"
+      "Flying",
+      "Normal"
     ],
     "stats": {
       "hp": 83,
@@ -899,8 +899,8 @@
     "slug": "spearow",
     "name": "Spearow",
     "types": [
-      "Normal",
-      "Flying"
+      "Flying",
+      "Normal"
     ],
     "stats": {
       "hp": 40,
@@ -939,8 +939,8 @@
     "slug": "fearow",
     "name": "Fearow",
     "types": [
-      "Normal",
-      "Flying"
+      "Flying",
+      "Normal"
     ],
     "stats": {
       "hp": 65,
@@ -3707,8 +3707,8 @@
     "slug": "farfetchd",
     "name": "Farfetch'd",
     "types": [
-      "Normal",
-      "Flying"
+      "Flying",
+      "Normal"
     ],
     "stats": {
       "hp": 52,
@@ -7154,8 +7154,8 @@
     "slug": "hoothoot",
     "name": "Hoothoot",
     "types": [
-      "Normal",
-      "Flying"
+      "Flying",
+      "Normal"
     ],
     "stats": {
       "hp": 60,
@@ -7198,8 +7198,8 @@
     "slug": "noctowl",
     "name": "Noctowl",
     "types": [
-      "Normal",
-      "Flying"
+      "Flying",
+      "Normal"
     ],
     "stats": {
       "hp": 100,
@@ -13714,7 +13714,7 @@
       }
     ],
     "hiddenAbility": null,
-    "isLegendary": false,
+    "isLegendary": true,
     "evolutionChain": []
   },
   {
@@ -14813,7 +14813,7 @@
       }
     ],
     "hiddenAbility": null,
-    "isLegendary": false,
+    "isLegendary": true,
     "evolutionChain": []
   },
   {
@@ -14839,7 +14839,7 @@
       }
     ],
     "hiddenAbility": null,
-    "isLegendary": false,
+    "isLegendary": true,
     "evolutionChain": []
   },
   {
@@ -14866,7 +14866,7 @@
       }
     ],
     "hiddenAbility": null,
-    "isLegendary": false,
+    "isLegendary": true,
     "evolutionChain": []
   },
   {
@@ -14896,7 +14896,7 @@
       "name": "Telepathy",
       "description": "Protects against friendly Pokémon's damaging moves."
     },
-    "isLegendary": false,
+    "isLegendary": true,
     "evolutionChain": []
   },
   {
@@ -14926,7 +14926,7 @@
       "name": "Telepathy",
       "description": "Protects against friendly Pokémon's damaging moves."
     },
-    "isLegendary": false,
+    "isLegendary": true,
     "evolutionChain": []
   },
   {
@@ -14956,7 +14956,7 @@
       "name": "Telepathy",
       "description": "Protects against friendly Pokémon's damaging moves."
     },
-    "isLegendary": false,
+    "isLegendary": true,
     "evolutionChain": []
   },
   {
@@ -14982,7 +14982,7 @@
       }
     ],
     "hiddenAbility": null,
-    "isLegendary": false,
+    "isLegendary": true,
     "evolutionChain": []
   },
   {
@@ -15008,7 +15008,7 @@
       }
     ],
     "hiddenAbility": null,
-    "isLegendary": false,
+    "isLegendary": true,
     "evolutionChain": []
   },
   {
@@ -15035,7 +15035,7 @@
       }
     ],
     "hiddenAbility": null,
-    "isLegendary": false,
+    "isLegendary": true,
     "evolutionChain": []
   },
   {
@@ -15062,7 +15062,7 @@
       }
     ],
     "hiddenAbility": null,
-    "isLegendary": false,
+    "isLegendary": true,
     "evolutionChain": []
   },
   {
@@ -15089,7 +15089,7 @@
       }
     ],
     "hiddenAbility": null,
-    "isLegendary": false,
+    "isLegendary": true,
     "evolutionChain": []
   },
   {
@@ -15116,7 +15116,7 @@
       }
     ],
     "hiddenAbility": null,
-    "isLegendary": false,
+    "isLegendary": true,
     "evolutionChain": []
   },
   {
@@ -16230,7 +16230,7 @@
       }
     ],
     "hiddenAbility": null,
-    "isLegendary": false,
+    "isLegendary": true,
     "evolutionChain": []
   },
   {
@@ -16257,7 +16257,7 @@
       }
     ],
     "hiddenAbility": null,
-    "isLegendary": false,
+    "isLegendary": true,
     "evolutionChain": []
   },
   {
@@ -17885,8 +17885,8 @@
     "slug": "fletchling",
     "name": "Fletchling",
     "types": [
-      "Normal",
-      "Flying"
+      "Flying",
+      "Normal"
     ],
     "stats": {
       "hp": 45,
@@ -18898,8 +18898,8 @@
     "slug": "swablu",
     "name": "Swablu",
     "types": [
-      "Normal",
-      "Flying"
+      "Flying",
+      "Normal"
     ],
     "stats": {
       "hp": 45,
@@ -19143,7 +19143,7 @@
       "name": "Sturdy",
       "description": "Prevents being KOed from full HP, leaving 1 HP instead.  Protects against the one-hit KO moves regardless of HP."
     },
-    "isLegendary": false,
+    "isLegendary": true,
     "evolutionChain": []
   },
   {
@@ -19172,7 +19172,7 @@
       "name": "Ice Body",
       "description": "Heals for 1/16 max HP after each turn during hail.  Protects against hail damage."
     },
-    "isLegendary": false,
+    "isLegendary": true,
     "evolutionChain": []
   },
   {
@@ -19201,7 +19201,7 @@
       "name": "Light Metal",
       "description": "Halves the Pokémon's weight."
     },
-    "isLegendary": false,
+    "isLegendary": true,
     "evolutionChain": []
   },
   {
@@ -19227,7 +19227,7 @@
       }
     ],
     "hiddenAbility": null,
-    "isLegendary": false,
+    "isLegendary": true,
     "evolutionChain": [
       {
         "dexNumber": 450,
@@ -19883,7 +19883,7 @@
       }
     ],
     "hiddenAbility": null,
-    "isLegendary": false,
+    "isLegendary": true,
     "evolutionChain": [
       {
         "dexNumber": 466,
@@ -19919,7 +19919,7 @@
       }
     ],
     "hiddenAbility": null,
-    "isLegendary": false,
+    "isLegendary": true,
     "evolutionChain": [
       {
         "dexNumber": 466,
@@ -19954,7 +19954,7 @@
       }
     ],
     "hiddenAbility": null,
-    "isLegendary": false,
+    "isLegendary": true,
     "evolutionChain": []
   },
   {
@@ -20015,7 +20015,7 @@
       }
     ],
     "hiddenAbility": null,
-    "isLegendary": false,
+    "isLegendary": true,
     "evolutionChain": [
       {
         "dexNumber": 450,
@@ -21281,7 +21281,7 @@
       }
     ],
     "hiddenAbility": null,
-    "isLegendary": false,
+    "isLegendary": true,
     "evolutionChain": []
   },
   {
@@ -21899,8 +21899,8 @@
     "slug": "taillow",
     "name": "Taillow",
     "types": [
-      "Normal",
-      "Flying"
+      "Flying",
+      "Normal"
     ],
     "stats": {
       "hp": 40,
@@ -21939,8 +21939,8 @@
     "slug": "swellow",
     "name": "Swellow",
     "types": [
-      "Normal",
-      "Flying"
+      "Flying",
+      "Normal"
     ],
     "stats": {
       "hp": 60,

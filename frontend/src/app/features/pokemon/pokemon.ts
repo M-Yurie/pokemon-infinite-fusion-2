@@ -28,6 +28,10 @@ interface WeaknessGroup { multiplier: number; label: string; types: string[]; }
 
 interface EvoInfo { prev: EvolutionEntry | null; next: EvolutionEntry[]; }
 
+interface EvoNode { entry: EvolutionEntry; children: EvoNode[]; }
+interface EvoRenderItem { entry: EvolutionEntry; }
+interface EvoRenderRow { items: EvoRenderItem[]; isIndented: boolean; parentLevel?: number; }
+
 @Component({
   selector: 'app-pokemon',
   imports: [RouterLink],
@@ -54,6 +58,10 @@ export class PokemonDetail implements OnInit, OnDestroy {
   // Badge counts
   readonly leftBadge  = signal(0);
   readonly rightBadge = signal(0);
+
+  // Generated sprite flags
+  readonly leftGenerated  = signal(false);
+  readonly rightGenerated = signal(false);
 
   // Gallery
   readonly galleryTarget   = signal<'left' | 'right' | null>(null);
@@ -188,13 +196,36 @@ export class PokemonDetail implements OnInit, OnDestroy {
     return b.evolutionChain.some(e => hIds.has(e.dexNumber));
   });
 
-  readonly headChain = computed(() => this.head()?.evolutionChain ?? []);
-  readonly bodyChain = computed(() => this.body()?.evolutionChain ?? []);
+  readonly headEvoRows = computed((): EvoRenderRow[] => {
+    const h = this.head();
+    if (!h) return [];
+    if (!h.evolutionChain.length) {
+      return [{ isIndented: false, items: [{ entry: { dexNumber: h.id, name: h.name } }] }];
+    }
+    const tree = this.buildEvoTree(h.evolutionChain);
+    return tree ? this.treeToRows(tree, false) : [];
+  });
+
+  readonly bodyEvoRows = computed((): EvoRenderRow[] => {
+    if (this.isSelfFusion()) return [];
+    const b = this.body();
+    if (!b) return [];
+    if (!b.evolutionChain.length) {
+      return [{ isIndented: false, items: [{ entry: { dexNumber: b.id, name: b.name } }] }];
+    }
+    const tree = this.buildEvoTree(b.evolutionChain);
+    return tree ? this.treeToRows(tree, false) : [];
+  });
 
   readonly devolveOptions = computed(() => {
     const opts: { label: string; id: string }[] = [];
     const hPrev = this.headEvoInfo().prev;
-    if (hPrev) opts.push({ label: `Devolve Head → ${hPrev.name}`, id: `${hPrev.dexNumber}.${this.bodyId()}` });
+    if (hPrev) {
+      opts.push({ label: `Devolve Head → ${hPrev.name}`, id: `${hPrev.dexNumber}.${this.bodyId()}` });
+      if (this.isSelfFusion()) {
+        opts.push({ label: `Devolve Body → ${hPrev.name}`, id: `${this.headId()}.${hPrev.dexNumber}` });
+      }
+    }
     if (!this.isSelfFusion()) {
       const bPrev = this.bodyEvoInfo().prev;
       if (bPrev) opts.push({ label: `Devolve Body → ${bPrev.name}`, id: `${this.headId()}.${bPrev.dexNumber}` });
@@ -206,6 +237,9 @@ export class PokemonDetail implements OnInit, OnDestroy {
     const opts: { label: string; id: string }[] = [];
     for (const e of this.headEvoInfo().next) {
       opts.push({ label: `Evolve Head → ${e.name}`, id: `${e.dexNumber}.${this.bodyId()}` });
+      if (this.isSelfFusion()) {
+        opts.push({ label: `Evolve Body → ${e.name}`, id: `${this.headId()}.${e.dexNumber}` });
+      }
     }
     if (!this.isSelfFusion()) {
       for (const e of this.bodyEvoInfo().next) {
@@ -234,6 +268,8 @@ export class PokemonDetail implements OnInit, OnDestroy {
         this.rightDisplayUrl.set(null);
         this.leftBadge.set(0);
         this.rightBadge.set(0);
+        this.leftGenerated.set(false);
+        this.rightGenerated.set(false);
         this.loading.set(true);
 
         this.pokemonSvc.loadAll().subscribe(all => {
@@ -350,7 +386,10 @@ export class PokemonDetail implements OnInit, OnDestroy {
     const probe = new Image();
     probe.onload = () => {
       fallback.style.backgroundImage    = `url('${src}')`;
-      fallback.style.backgroundPosition = `-${(col - 1) * 192}px -${(row - 1) * 192}px`;
+      if (side === 'left') this.leftGenerated.set(true);
+    else this.rightGenerated.set(true);
+
+    fallback.style.backgroundPosition = `-${col * 192}px -${(row - 1) * 192}px`;
       fallback.style.backgroundSize     = `${probe.naturalWidth * 2}px ${probe.naturalHeight * 2}px`;
       fallback.style.display            = 'block';
     };
@@ -367,12 +406,23 @@ export class PokemonDetail implements OnInit, OnDestroy {
   }
 
   getStatColor(value: number, isTotal: boolean): string {
-    const pct = isTotal ? (value - 6) / 1524 : value / 255;
-    if (pct < 0.2) return '#ef4444';
-    if (pct < 0.4) return '#f97316';
-    if (pct < 0.6) return '#eab308';
-    if (pct < 0.8) return '#22c55e';
-    return '#3b82f6';
+    if (!isTotal) {
+      switch (true) {
+        case value >= 1 && value <= 49: return '#ef4444';
+        case value >= 50 && value <= 89: return '#eab308';
+        case value >= 90 && value <= 129: return '#22c55e';
+        case value >= 130 && value <= 255: return '#3b82f6';
+        default: return '#9ca3af';
+      }
+    } else {
+      switch (true) {
+        case value >= 6 && value <= 299: return '#ef4444';
+        case value >= 300 && value <= 499: return '#eab308';
+        case value >= 500 && value <= 639: return '#22c55e';
+        case value >= 640 && value <= 1524: return '#3b82f6';
+        default: return '#9ca3af';
+      }
+    }
   }
 
   multLabel(m: number): string {
@@ -382,8 +432,60 @@ export class PokemonDetail implements OnInit, OnDestroy {
 
   toggleDevolve(): void { this.devolveOpen.update(v => !v); this.evolveOpen.set(false); }
   toggleEvolve(): void  { this.evolveOpen.update(v => !v); this.devolveOpen.set(false); }
+  scrollToTop(): void   { window.scrollTo({ top: 0, behavior: 'smooth' }); }
 
   evoCardRoute(id: number): string[] { return ['/details', `${id}.${id}`]; }
+
+  getEvoArrowLevel(row: EvoRenderRow, idx: number): number | undefined {
+    return idx === 0 ? row.parentLevel : row.items[idx - 1].entry.evolvesAtLevel;
+  }
+
+  private buildEvoTree(chain: EvolutionEntry[]): EvoNode | null {
+    if (!chain || chain.length === 0) return null;
+    if (chain.length === 1) return { entry: chain[0], children: [] };
+    const root = chain[0];
+    const rest = chain.slice(1);
+    const allDirect = rest.every(e => !e.evolvesAtLevel);
+    if (allDirect) {
+      return { entry: root, children: rest.map(e => ({ entry: e, children: [] })) };
+    }
+    const hasMultipleBranches = rest.filter(e => e.evolvesAtLevel).length > 1;
+    if (hasMultipleBranches) {
+      const branches: EvoNode[] = [];
+      let i = 0;
+      while (i < rest.length) {
+        const node: EvoNode = { entry: rest[i], children: [] };
+        if (i + 1 < rest.length && !rest[i + 1].evolvesAtLevel) {
+          node.children = [{ entry: rest[i + 1], children: [] }];
+          i += 2;
+        } else {
+          i += 1;
+        }
+        branches.push(node);
+      }
+      return { entry: root, children: branches };
+    }
+    const subtree = this.buildEvoTree(rest);
+    return { entry: root, children: subtree ? [subtree] : [] };
+  }
+
+  private treeToRows(node: EvoNode, indent: boolean, parentLevel?: number): EvoRenderRow[] {
+    if (node.children.length === 0) {
+      return [{ isIndented: indent, parentLevel, items: [{ entry: node.entry }] }];
+    }
+    if (node.children.length === 1) {
+      const childRows = this.treeToRows(node.children[0], indent, node.entry.evolvesAtLevel);
+      return [
+        { isIndented: indent, parentLevel, items: [{ entry: node.entry }, ...childRows[0].items] },
+        ...childRows.slice(1),
+      ];
+    }
+    const rows: EvoRenderRow[] = [{ isIndented: indent, parentLevel, items: [{ entry: node.entry }] }];
+    for (const child of node.children) {
+      rows.push(...this.treeToRows(child, true, node.entry.evolvesAtLevel));
+    }
+    return rows;
+  }
 
   private computeWeaknesses(types: string[]): WeaknessGroup[] {
     const chart = this.typeChart();
@@ -395,13 +497,12 @@ export class PokemonDetail implements OnInit, OnDestroy {
       groups.get(m)!.push(atkType);
     }
     return [4, 2, 1, 0.5, 0.25, 0]
-      .filter(m => groups.has(m))
       .map(m => ({ multiplier: m, label: this.multLabel(m), types: groups.get(m)! }));
   }
 
   private getEvoInfo(chain: EvolutionEntry[], currentId: number): EvoInfo {
     const idx = chain.findIndex(e => e.dexNumber === currentId);
     if (idx === -1) return { prev: null, next: [] };
-    return { prev: idx > 0 ? chain[idx - 1] : null, next: chain.slice(idx + 1) };
+    return { prev: idx > 0 ? chain[idx - 1] : null, next: idx < chain.length - 1 ? [chain[idx + 1]] : [] };
   }
 }

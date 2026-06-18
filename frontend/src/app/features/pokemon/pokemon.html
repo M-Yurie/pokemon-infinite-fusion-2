@@ -57,53 +57,59 @@
   @if (!loading() && head()) {
     <div class="pd-inner">
 
-      <!-- ─── Mobile evo dropdowns ───────────────────────────────────────── -->
-      <div class="pd-mobile-evo">
-        @if (devolveOptions().length > 0) {
-          <div class="pd-mobile-evo__wrap">
-            <button class="pd-mobile-evo__btn" (click)="toggleDevolve(); $event.stopPropagation()">
-              Devolve
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
-            </button>
-            @if (devolveOpen()) {
-              <div class="pd-mobile-evo__dropdown" (click)="$event.stopPropagation()">
-                @for (opt of devolveOptions(); track opt.id) {
-                  <a class="pd-mobile-evo__option" [routerLink]="['/details', opt.id]" (click)="devolveOpen.set(false)">{{ opt.label }}</a>
-                }
-              </div>
-            }
-          </div>
-        }
-        @if (evolveOptions().length > 0) {
-          <div class="pd-mobile-evo__wrap">
-            <button class="pd-mobile-evo__btn" (click)="toggleEvolve(); $event.stopPropagation()">
-              Evolve
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
-            </button>
-            @if (evolveOpen()) {
-              <div class="pd-mobile-evo__dropdown" (click)="$event.stopPropagation()">
-                @for (opt of evolveOptions(); track opt.id) {
-                  <a class="pd-mobile-evo__option" [routerLink]="['/details', opt.id]" (click)="evolveOpen.set(false)">{{ opt.label }}</a>
-                }
-              </div>
-            }
-          </div>
-        }
-      </div>
-
       <!-- ─── Sprite area ──────────────────────────────────────────────────── -->
       <div class="pd-sprite-layout">
+
+        <!-- Mobile evo dropdowns (absolute on mobile, hidden on desktop) -->
+        <div class="pd-mobile-evo">
+          @if (devolveOptions().length > 0) {
+            <div class="pd-mobile-evo__wrap pd-mobile-evo__wrap--left">
+              <button class="pd-mobile-evo__btn" (click)="toggleDevolve(); $event.stopPropagation()">
+                Devolve
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              @if (devolveOpen()) {
+                <div class="pd-mobile-evo__dropdown" (click)="$event.stopPropagation()">
+                  @for (opt of devolveOptions(); track opt.id) {
+                    <a class="pd-mobile-evo__option" [routerLink]="['/details', opt.id]" (click)="devolveOpen.set(false); scrollToTop()">{{ opt.label }}</a>
+                  }
+                </div>
+              }
+            </div>
+          }
+          @if (evolveOptions().length > 0) {
+            <div class="pd-mobile-evo__wrap pd-mobile-evo__wrap--right">
+              <button class="pd-mobile-evo__btn" (click)="toggleEvolve(); $event.stopPropagation()">
+                Evolve
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              @if (evolveOpen()) {
+                <div class="pd-mobile-evo__dropdown pd-mobile-evo__dropdown--right" (click)="$event.stopPropagation()">
+                  @for (opt of evolveOptions(); track opt.id) {
+                    <a class="pd-mobile-evo__option" [routerLink]="['/details', opt.id]" (click)="evolveOpen.set(false); scrollToTop()">{{ opt.label }}</a>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
 
         <!-- Left: Devolve buttons (desktop) -->
         <div class="pd-evo-col pd-evo-col--left">
           @if (headEvoInfo().prev) {
-            <a class="pd-evo-btn pd-evo-btn--left" [routerLink]="['/details', headEvoInfo().prev!.dexNumber + '.' + bodyId()]">
+            <a class="pd-evo-btn pd-evo-btn--left" [routerLink]="['/details', headEvoInfo().prev!.dexNumber + '.' + bodyId()]" (click)="scrollToTop()">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
               Head → {{ headEvoInfo().prev!.name }}
             </a>
+            @if (isSelfFusion()) {
+              <a class="pd-evo-btn pd-evo-btn--left" [routerLink]="['/details', headId() + '.' + headEvoInfo().prev!.dexNumber]" (click)="scrollToTop()">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+                Body → {{ headEvoInfo().prev!.name }}
+              </a>
+            }
           }
           @if (!isSelfFusion() && bodyEvoInfo().prev) {
-            <a class="pd-evo-btn pd-evo-btn--left" [routerLink]="['/details', headId() + '.' + bodyEvoInfo().prev!.dexNumber]">
+            <a class="pd-evo-btn pd-evo-btn--left" [routerLink]="['/details', headId() + '.' + bodyEvoInfo().prev!.dexNumber]" (click)="scrollToTop()">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
               Body → {{ bodyEvoInfo().prev!.name }}
             </a>
@@ -132,6 +138,9 @@
                 <div class="pd-badge" (click)="openGallery('left', $event)" [title]="leftBadge() + ' sprites'">
                   {{ leftBadge() >= 10 ? '+' : leftBadge() }}
                 </div>
+              }
+              @if (leftGenerated()) {
+                <span class="pd-sprite-generated-badge">Generated</span>
               }
             </div>
             <div class="pd-sprite-types">
@@ -163,6 +172,9 @@
                   {{ rightBadge() >= 10 ? '+' : rightBadge() }}
                 </div>
               }
+              @if (rightGenerated()) {
+                <span class="pd-sprite-generated-badge">Generated</span>
+              }
             </div>
             <div class="pd-sprite-types">
               @for (t of rightTypes(); track t) {
@@ -176,14 +188,20 @@
         <!-- Right: Evolve buttons (desktop) -->
         <div class="pd-evo-col pd-evo-col--right">
           @for (e of headEvoInfo().next; track e.dexNumber) {
-            <a class="pd-evo-btn pd-evo-btn--right" [routerLink]="['/details', e.dexNumber + '.' + bodyId()]">
+            <a class="pd-evo-btn pd-evo-btn--right" [routerLink]="['/details', e.dexNumber + '.' + bodyId()]" (click)="scrollToTop()">
               Head → {{ e.name }}
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
             </a>
+            @if (isSelfFusion()) {
+              <a class="pd-evo-btn pd-evo-btn--right" [routerLink]="['/details', headId() + '.' + e.dexNumber]" (click)="scrollToTop()">
+                Body → {{ e.name }}
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+              </a>
+            }
           }
           @for (e of bodyEvoInfo().next; track e.dexNumber) {
             @if (!isSelfFusion()) {
-              <a class="pd-evo-btn pd-evo-btn--right" [routerLink]="['/details', headId() + '.' + e.dexNumber]">
+              <a class="pd-evo-btn pd-evo-btn--right" [routerLink]="['/details', headId() + '.' + e.dexNumber]" (click)="scrollToTop()">
                 Body → {{ e.name }}
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
               </a>
@@ -220,16 +238,16 @@
                   </div>
                   <span class="pd-stat-value" [style.color]="getStatColor(s.leftVal, s.isTotal)">{{ s.leftVal }}</span>
                   @if (s.diff !== 0) {
-                    <span class="pd-stat-diff" [class.pd-stat-diff--pos]="s.diff > 0" [class.pd-stat-diff--neg]="s.diff < 0">
-                      {{ s.diff > 0 ? '+' : '' }}{{ s.diff }}
+                    <span class="pd-stat-diff" [class.pd-stat-diff--pos]="s.diff < 0" [class.pd-stat-diff--neg]="s.diff > 0">
+                      ({{ s.diff < 0 ? ('+' + (-s.diff)) : ('-' + s.diff) }})
                     </span>
                   }
                 </div>
                 <div class="pd-stat-name">{{ s.label }}</div>
                 <div class="pd-stat-right">
                   @if (s.diff !== 0) {
-                    <span class="pd-stat-diff" [class.pd-stat-diff--pos]="s.diff < 0" [class.pd-stat-diff--neg]="s.diff > 0">
-                      {{ s.diff < 0 ? '+' : '' }}{{ s.diff !== 0 ? (-s.diff) : '' }}
+                    <span class="pd-stat-diff" [class.pd-stat-diff--pos]="s.diff > 0" [class.pd-stat-diff--neg]="s.diff < 0">
+                      ({{ s.diff > 0 ? ('+' + s.diff) : s.diff }})
                     </span>
                   }
                   <span class="pd-stat-value" [style.color]="getStatColor(s.rightVal, s.isTotal)">{{ s.rightVal }}</span>
@@ -279,13 +297,14 @@
             <!-- One centered table -->
             <div class="pd-weak-table">
               @for (group of leftWeaknesses(); track group.multiplier) {
-                <div class="pd-weak-row">
-                  <span class="pd-weak-mult">{{ group.label }}</span>
-                  <div class="pd-weak-types">
+                <div class="pd-weak-row pd-weak-row--single">
+                  <span class="pd-weak-row__multiplier">{{ group.label }}</span>
+                  <div class="pd-weak-row__badges pd-weak-row__badges--single">
                     @for (t of group.types; track t) {
                       <span class="pd-type-badge" [style.--tc]="typeColor(t)">{{ t }}</span>
                     }
                   </div>
+                  <span class="pd-weak-row__multiplier pd-weak-row__multiplier--right">{{ group.label }}</span>
                 </div>
               }
             </div>
@@ -293,12 +312,11 @@
             <!-- Two tables side by side -->
             <div class="pd-weak-split">
               <div class="pd-weak-panel">
-                <div class="pd-weak-panel__label">{{ leftLabel().name }}</div>
                 <div class="pd-weak-table">
                   @for (group of leftWeaknesses(); track group.multiplier) {
                     <div class="pd-weak-row">
-                      <span class="pd-weak-mult">{{ group.label }}</span>
-                      <div class="pd-weak-types">
+                      <span class="pd-weak-row__multiplier">{{ group.label }}</span>
+                      <div class="pd-weak-row__badges">
                         @for (t of group.types; track t) {
                           <span class="pd-type-badge" [style.--tc]="typeColor(t)">{{ t }}</span>
                         }
@@ -308,16 +326,15 @@
                 </div>
               </div>
               <div class="pd-weak-panel">
-                <div class="pd-weak-panel__label">{{ rightLabel().name }}</div>
                 <div class="pd-weak-table">
                   @for (group of rightWeaknesses(); track group.multiplier) {
-                    <div class="pd-weak-row">
-                      <span class="pd-weak-mult">{{ group.label }}</span>
-                      <div class="pd-weak-types">
+                    <div class="pd-weak-row pd-weak-row--right">
+                      <div class="pd-weak-row__badges pd-weak-row__badges--right">
                         @for (t of group.types; track t) {
                           <span class="pd-type-badge" [style.--tc]="typeColor(t)">{{ t }}</span>
                         }
                       </div>
+                      <span class="pd-weak-row__multiplier pd-weak-row__multiplier--right">{{ group.label }}</span>
                     </div>
                   }
                 </div>
@@ -332,42 +349,50 @@
         <div class="pd-section-bar">Evolution Line</div>
         <div class="pd-section-body pd-evo-section">
 
-          <!-- Head chain -->
-          <div class="pd-evo-chain">
-            @for (entry of headChain(); track entry.dexNumber; let i = $index) {
-              @if (i > 0) {
-                <div class="pd-evo-arrow">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
-                  @if (headChain()[i - 1].evolvesAtLevel) {
-                    <span class="pd-evo-level">Lv {{ headChain()[i - 1].evolvesAtLevel }}</span>
+          <!-- Head tree -->
+          <div class="pd-evo-tree">
+            @for (row of headEvoRows(); track $index) {
+              <div class="pd-evo-row" [class.pd-evo-row--indented]="row.isIndented">
+                @for (item of row.items; track item.entry.dexNumber; let idx = $index) {
+                  @if (idx > 0 || row.isIndented) {
+                    <div class="pd-evo-arrow">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+                      @if (getEvoArrowLevel(row, idx)) {
+                        <span class="pd-evo-level">Lv {{ getEvoArrowLevel(row, idx) }}</span>
+                      }
+                    </div>
                   }
-                </div>
-              }
-              <a class="pd-evo-card" [routerLink]="evoCardRoute(entry.dexNumber)" [class.pd-evo-card--current]="entry.dexNumber === headId() || entry.dexNumber === bodyId()">
-                <img class="pd-evo-card__img" [src]="imageSvc.getBaseSprite(entry.dexNumber)" [alt]="entry.name" loading="lazy" />
-                <span class="pd-evo-card__num">#{{ entry.dexNumber }}</span>
-                <span class="pd-evo-card__name">{{ entry.name }}</span>
-              </a>
+                  <a class="pd-evo-card" [routerLink]="evoCardRoute(item.entry.dexNumber)" [class.pd-evo-card--current]="item.entry.dexNumber === headId() || item.entry.dexNumber === bodyId()" (click)="scrollToTop()">
+                    <img class="pd-evo-card__img" [src]="imageSvc.getBaseSprite(item.entry.dexNumber)" [alt]="item.entry.name" loading="lazy" />
+                    <span class="pd-evo-card__num">#{{ item.entry.dexNumber }}</span>
+                    <span class="pd-evo-card__name">{{ item.entry.name }}</span>
+                  </a>
+                }
+              </div>
             }
           </div>
 
-          <!-- Body chain (only if different family) -->
+          <!-- Body tree (only if different family) -->
           @if (!sameFamily()) {
-            <div class="pd-evo-chain pd-evo-chain--second">
-              @for (entry of bodyChain(); track entry.dexNumber; let i = $index) {
-                @if (i > 0) {
-                  <div class="pd-evo-arrow">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
-                    @if (bodyChain()[i - 1].evolvesAtLevel) {
-                      <span class="pd-evo-level">Lv {{ bodyChain()[i - 1].evolvesAtLevel }}</span>
+            <div class="pd-evo-tree pd-evo-tree--second">
+              @for (row of bodyEvoRows(); track $index) {
+                <div class="pd-evo-row" [class.pd-evo-row--indented]="row.isIndented">
+                  @for (item of row.items; track item.entry.dexNumber; let idx = $index) {
+                    @if (idx > 0 || row.isIndented) {
+                      <div class="pd-evo-arrow">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+                        @if (getEvoArrowLevel(row, idx)) {
+                          <span class="pd-evo-level">Lv {{ getEvoArrowLevel(row, idx) }}</span>
+                        }
+                      </div>
                     }
-                  </div>
-                }
-                <a class="pd-evo-card" [routerLink]="evoCardRoute(entry.dexNumber)" [class.pd-evo-card--current]="entry.dexNumber === headId() || entry.dexNumber === bodyId()">
-                  <img class="pd-evo-card__img" [src]="imageSvc.getBaseSprite(entry.dexNumber)" [alt]="entry.name" loading="lazy" />
-                  <span class="pd-evo-card__num">#{{ entry.dexNumber }}</span>
-                  <span class="pd-evo-card__name">{{ entry.name }}</span>
-                </a>
+                    <a class="pd-evo-card" [routerLink]="evoCardRoute(item.entry.dexNumber)" [class.pd-evo-card--current]="item.entry.dexNumber === headId() || item.entry.dexNumber === bodyId()" (click)="scrollToTop()">
+                      <img class="pd-evo-card__img" [src]="imageSvc.getBaseSprite(item.entry.dexNumber)" [alt]="item.entry.name" loading="lazy" />
+                      <span class="pd-evo-card__num">#{{ item.entry.dexNumber }}</span>
+                      <span class="pd-evo-card__name">{{ item.entry.name }}</span>
+                    </a>
+                  }
+                </div>
               }
             </div>
           }
