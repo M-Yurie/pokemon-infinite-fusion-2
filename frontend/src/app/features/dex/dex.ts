@@ -215,10 +215,12 @@ export class Dex implements AfterViewInit, OnDestroy {
         if (storedPref) {
           card.displaySpriteUrl = this.imageSvc.getFusionVariantSprite(card.head.id, card.body.id, storedPref);
           needsRerender = true;
-        } else if (count > 1) {
-          card.displaySpriteUrl = await this.imageSvc.getLastSpriteUrl(card.head.id, card.body.id);
-          needsRerender = true;
         }
+        // else if (count > 1) {
+        //   card.displaySpriteUrl = await this.imageSvc.getLastSpriteUrl(card.head.id, card.body.id);
+        //   needsRerender = true;
+        // }
+
       } else {
         count = await this.imageSvc.getSpriteCountForBase(card.head.id);
       }
