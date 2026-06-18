@@ -39,22 +39,22 @@ export class Home implements AfterViewInit, OnDestroy {
     {
       title: 'The Fusion Index',
       subtitle: 'Discover thousands of unique fusion combinations',
-      imageUrl: 'assets/images/gallery-1.jpg',
+      imageUrl: 'assets/images/gallery-1.webp',
     },
     {
       title: 'Hoenn Overworld',
       subtitle: 'Explore the vibrant Hoenn region like never before',
-      imageUrl: 'assets/images/gallery-2.jpg',
+      imageUrl: 'assets/images/gallery-2.png',
     },
     {
       title: 'Starter Fusions',
       subtitle: 'Meet the new Hoenn starters and their fusions',
-      imageUrl: 'assets/images/gallery-3.jpg',
+      imageUrl: 'assets/images/gallery-3.webp',
     },
     {
       title: 'Dynamic Weather',
       subtitle: 'A living world that changes around you',
-      imageUrl: 'assets/images/gallery-4.jpg',
+      imageUrl: 'assets/images/gallery-4.png',
     },
   ];
 
